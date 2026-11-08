@@ -1,10 +1,16 @@
+
+    
+  
 import UIKit
 import WebKit
 
-/// Нативная iOS-оболочка для автономной Rank Arena v2.
-/// Игра входит в комплект приложения, подключение к интернету не требуется.
+/// Rank Arena: свежая игра из GitHub Pages, встроенная игра без интернета.
+/// Чтобы менять игровые механики, обновляйте index.html на GitHub Pages.
 final class GameViewController: UIViewController, WKNavigationDelegate {
     private var gameView: WKWebView!
+    private let onlineURL = URL(string: "https://denisbarabash9-del.github.io/Rank-Arena/index.html")!
+    private let trustedHost = "denisbarabash9-del.github.io"
+    private var isShowingOfflineGame = false
 
     override func loadView() {
         let configuration = WKWebViewConfiguration()
@@ -14,7 +20,7 @@ final class GameViewController: UIViewController, WKNavigationDelegate {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = self
         webView.isOpaque = false
-        webView.backgroundColor = UIColor(red: 0.05, green: 0.06, blue: 0.16, alpha: 1.0)
+        webView.backgroundColor = UIColor(red: 0.05, green: 0.06, blue: 0.16, alpha: 1)
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
@@ -22,31 +28,73 @@ final class GameViewController: UIViewController, WKNavigationDelegate {
         if #available(iOS 16.4, *) {
             webView.isInspectable = false
         }
-        self.gameView = webView
-        self.view = webView
+        gameView = webView
+        view = webView
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        guard let gameURL = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "Game") else {
-            gameView.loadHTMLString("<h1>Ошибка: игра не включена в приложение.</h1>", baseURL: nil)
+        loadLatestGame()
+    }
+
+    private func loadLatestGame() {
+        // Проверяем, опубликована ли игра на GitHub Pages.
+        var request = URLRequest(
+            url: onlineURL,
+            cachePolicy: .reloadIgnoringLocalCacheData,
+            timeoutInterval: 10
+        )
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let status = (response as? HTTPURLResponse)?.statusCode
+                let looksLikeHTML = data.flatMap {
+                    String(data: $0.prefix(4096), encoding: .utf8)
+                }?.lowercased().contains("<html") ?? false
+
+                if error == nil && status == 200 && looksLikeHTML {
+                    // Каждый запуск загружает актуальную онлайн-версию.
+                    self.gameView.load(request)
+                } else {
+                    self.loadOfflineGame()
+                }
+            }
+        }.resume()
+    }
+
+    private func loadOfflineGame() {
+        guard !isShowingOfflineGame else { return }
+        isShowingOfflineGame = true
+
+        guard let fileURL = Bundle.main.url(
+            forResource: "index",
+            withExtension: "html",
+            subdirectory: "Game"
+        ) else {
+            gameView.loadHTMLString(
+                "<h2 style='color:white;background:#111'>Нет сети и встроенная игра не найдена.</h2>",
+                baseURL: nil
+            )
             return
         }
-        // Доступ только к папке встроенной игры; внешние сайты не используются.
-        gameView.loadFileURL(gameURL, allowingReadAccessTo: gameURL.deletingLastPathComponent())
+
+        gameView.loadFileURL(
+            fileURL,
+            allowingReadAccessTo: fileURL.deletingLastPathComponent()
+        )
     }
 
-    override var prefersStatusBarHidden: Bool { true }
-    override var prefersHomeIndicatorAutoHidden: Bool { true }
-    override var shouldAutorotate: Bool { true }
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
-    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation { .landscapeRight }
-
-    // Не допускаем случайных переходов на внешние сайты из игры.
     func webView(_ webView: WKWebView,
-                 decidePolicyFor navigationAction: WKNavigationAction,
-                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        let scheme = navigationAction.request.url?.scheme?.lowercased()
-        decisionHandler(scheme == "file" || scheme == "about" ? .allow : .cancel)
+                 didFailProvisionalNavigation navigation: WKNavigation!,
+                 withError error: Error) {
+        loadOfflineGame()
     }
-}
+
+    func webView(_ webView: WKWebView,
+                 didFail navigation: WKNavigation!,
+                 withError error: Error) {
+        loadOfflineGame()
+    }
+
