@@ -1,6 +1,3 @@
-
-    
-  
 import UIKit
 import WebKit
 
@@ -98,3 +95,47 @@ final class GameViewController: UIViewController, WKNavigationDelegate {
         loadOfflineGame()
     }
 
+    func webView(_ webView: WKWebView,
+                 decidePolicyFor navigationResponse: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if navigationResponse.isForMainFrame,
+           let http = navigationResponse.response as? HTTPURLResponse,
+           http.statusCode >= 400 {
+            decisionHandler(.cancel)
+            DispatchQueue.main.async { [weak self] in self?.loadOfflineGame() }
+            return
+        }
+        decisionHandler(.allow)
+    }
+
+    // Разрешаем только встроенные файлы и страницы своего проекта.
+    func webView(_ webView: WKWebView,
+                 decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard let url = navigationAction.request.url,
+              let scheme = url.scheme?.lowercased() else {
+            decisionHandler(.cancel)
+            return
+        }
+
+        if scheme == "file" || scheme == "about" {
+            decisionHandler(.allow)
+            return
+        }
+
+        if scheme == "https",
+           url.host?.lowercased() == trustedHost,
+           url.path.hasPrefix("/Rank-Arena/") {
+            decisionHandler(.allow)
+            return
+        }
+
+        decisionHandler(.cancel)
+    }
+
+    override var prefersStatusBarHidden: Bool { true }
+    override var prefersHomeIndicatorAutoHidden: Bool { true }
+    override var shouldAutorotate: Bool { true }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation { .landscapeRight }
+}
