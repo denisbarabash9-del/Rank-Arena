@@ -75,7 +75,20 @@ function pickFromBag(kind,count){
  return result;
 }
 let mapIndex=0,modifierIndex=0;
-function scoreCounter(h,foes){return foes.reduce((v,foe)=>v+(h.counters.includes(foe)?3:0)-(h.weak.includes(foe)?1.8:0),0)}
+// Matchups are reciprocal: a counter has an advantage and its target a disadvantage.
+function matchupEdge(attackerType,defenderType){
+ if(attackerType===defenderType)return 0;
+ const a=heroes[attackerType],b=heroes[defenderType];
+ if(!a||!b)return 0;
+ const good=Number(a.counters.includes(defenderType))+Number(b.weak.includes(attackerType));
+ const bad=Number(a.weak.includes(defenderType))+Number(b.counters.includes(attackerType));
+ return good>bad?1:bad>good?-1:0;
+}
+function matchupDamage(attackerType,defenderType){
+ const advantage=matchupEdge(attackerType,defenderType);
+ return advantage>0?1.30:advantage<0?.70:1;
+}
+function scoreCounter(heroId,foes){return foes.reduce((score,foe)=>score+matchupEdge(heroId,foe)*4,0)}
 
 function draftAvailable(){return heroes.map((_,i)=>i).filter(i=>!draft.picks.includes(i)&&!draft.bans.includes(i))}
 function beginDraft(practice=false){
@@ -91,7 +104,7 @@ function beginDraft(practice=false){
 }
 function tacticScore(heroId,foes,mates){
  const hero=heroes[heroId],cl=hero.cls,map=MAPS[mapIndex],fav=MODE_DATA[modeIndex].fav;
- let score=scoreCounter(hero,foes)*3;
+ let score=scoreCounter(heroId,foes)*3;
  score+=fav.includes(cl)?3:0;
  const matchClasses=mates.map(i=>heroes[i].cls),dups=matchClasses.filter(x=>x===cl).length;
  score-=dups*2.9;
@@ -116,8 +129,14 @@ function draftBotPick(){
  const slot=draft.order[draft.step],enemy=slot>=3;
  const foes=draft.picks.filter((x,i)=>x!==-1&&(enemy?i<3:i>=3));
  const mates=draft.picks.filter((x,i)=>x!==-1&&(enemy?i>=3:i<3));
- const options=draftAvailable().map(h=>({h,score:tacticScore(h,foes,mates)+rnd(-1,1.7)})).sort((a,b)=>b.score-a.score);
- const top=options.slice(0,Math.min(3,options.length)),choice=top[Math.random()<.75?0:Math.floor(Math.random()*top.length)];
+ const playerPick=draft.picks[0];
+ const options=draftAvailable().map(h=>({
+  h,
+  score:tacticScore(h,foes,mates)
+   +(enemy&&playerPick>=0?matchupEdge(h,playerPick)*5:0)
+   +rnd(-.8,.8)
+ })).sort((a,b)=>b.score-a.score);
+ const top=options.slice(0,Math.min(3,options.length)),choice=top[Math.random()<.9?0:Math.floor(Math.random()*top.length)];
  if(!choice)return;
  draft.picks[slot]=choice.h;draft.step++;draft.elapsed=0;
  if(draft.step===draft.playerTurn){
@@ -474,6 +493,7 @@ function explode(x,y,r,amount,owner,side){burst(x,y,'#ffc26f',18);
 }
 function damage(b,amount,attacker){
  if(!b.alive)return;
+ if(attacker&&attacker.side!==b.side)amount*=matchupDamage(attacker.type,b.type);
  if(b.shield>0)amount*=.45;
  b.hp-=amount;b.lastHit=0;b.hitFlash=.18;burst(b.x,b.y,heroes[b.type].color,3);
  // Tank trait: taking damage also charges a little super, even without attacking.
@@ -539,7 +559,7 @@ function tacticalGoal(a,enemy){
 function pickBotTarget(a){
  const choices=match.actors.filter(b=>b.alive&&b.side!==a.side&&teamCanSee(b,a.side));
  choices.sort((x,y)=>{
-  const priority=b=>dist(a,b)*.42-((heroes[a.type].counters.includes(b.type))?100:0)-(b.gems*50)-(heroes[b.type].cls==='ПОДДЕРЖКА'?20:0)+b.hp/b.max*60;
+  const priority=b=>dist(a,b)*.42-matchupEdge(a.type,b.type)*140-(b.gems*50)-(heroes[b.type].cls==='ПОДДЕРЖКА'?20:0)+b.hp/b.max*60;
   return priority(x)-priority(y);
  });return choices[0]||null;
 }
@@ -624,7 +644,8 @@ function updateBattle(dt){
     if(target)a.lastSpot={x:target.x,y:target.y};
     let goal=tacticalGoal(a,target),d=target?dist(a,target):99999;
     // Low HP retreats; tanks lead, support stays behind, snipers maintain range.
-    const retreat=a.hp<a.max*(cl==='ТАНК'?.27:.38);
+    const matchup=target?matchupEdge(a.type,target.type):0;
+    const retreat=a.hp<a.max*((cl==='ТАНК'?.27:.38)+(matchup<0?.12:0));
     const ideal=cl==='ТАНК'?range*.52:cl==='УБИЙЦА'?range*.64:cl==='СТРЕЛОК'?range*.87:cl==='МЕТАТЕЛЬ'?range*.84:cl==='ПОДДЕРЖКА'?range*.72:range*.74;
     if(target){
       const n=norm(target.x-a.x,target.y-a.y),rad=Math.atan2(n.y,n.x),side=a.strafeDir;
@@ -640,14 +661,14 @@ function updateBattle(dt){
       const n=norm(target.x-a.x,target.y-a.y);a.aim=n;
       if(a.botThought<=0){
         const isLob=[8,9].includes(a.type),canShoot=isLob||lineClear(a,target);
-        if(d<range*.9&&canShoot&&Math.random()<.69){const angle=Math.atan2(n.y,n.x)+rnd(-.22,.22);shoot(a,{x:Math.cos(angle),y:Math.sin(angle)})}
+        if(d<range*.9&&canShoot&&Math.random()<(matchup>0?.88:.75)){const angle=Math.atan2(n.y,n.x)+rnd(matchup>0?-.12:-.20,matchup>0?.12:.20);shoot(a,{x:Math.cos(angle),y:Math.sin(angle)})}
         if(a.sup>=100&&Math.random()<.40&&([1,4,5,6,12,17,19,20,21].includes(a.type)||d<250))superPower(a);
       }
     }else if(m.mode===4&&a.botThought<=0){
       const vault=m.vaults[1-a.side],d2=dist(a,vault),isLob=[8,9].includes(a.type);
       if(d2<h.range*.88&&(isLob||lineClear(a,vault))){a.aim=norm(vault.x-a.x,vault.y-a.y);shoot(a,a.aim)}
     }
-    if(a.botThought<=0)a.botThought=rnd(.65,1.25);
+    if(a.botThought<=0)a.botThought=rnd(matchup>0?.42:.58,matchup>0?.75:1.02);
   }
  }
  for(let i=m.delayed.length-1;i>=0;i--){const t=m.delayed[i];t.at-=dt;if(t.at<=0){const a=m.actors[t.owner];if(a&&a.alive)addBullet(a,t.dir,t.scale,t.opts);m.delayed.splice(i,1)}}
