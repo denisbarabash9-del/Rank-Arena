@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#13245c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>RETRO RANKED 2025 — 24 бойца</title><link rel="manifest" href="manifest.webmanifest"><style>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#13245c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>RETRO RANKED 2025 — управление 2.0</title><link rel="manifest" href="manifest.webmanifest"><style>
 *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0c1028;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}canvas{display:block;position:absolute;inset:0;width:100%;height:100%;touch-action:none}#turn{display:none;position:fixed;inset:0;z-index:40;background:#101331;color:white;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:15px;padding:20px}#turn .arrow{font-size:72px;animation:spin 2.5s infinite}@keyframes spin{0%,30%{transform:rotate(0)}80%,100%{transform:rotate(90deg)}}#turn strong{font-size:24px}#turn p{color:#babfe0;max-width:300px}#err{display:none;position:absolute;top:0;left:0;right:0;background:#b52f52;padding:12px;z-index:100;font-size:13px;white-space:pre-wrap}@media(orientation:portrait) and (max-width:900px){#turn{display:flex}canvas{display:none}}
 </style></head><body><canvas id="game"></canvas><div id="turn"><div class="arrow">📱</div><strong>Поверни телефон горизонтально</strong><p>Игра рассчитана на альбомную ориентацию.</p></div><div id="err"></div><script>
 'use strict';
@@ -26,11 +26,11 @@ const heroes=[
  {name:'ДЖИН',en:'Gene',cls:'КОНТРОЛЬ',role:'РАЗЛЕТАЮЩАЯСЯ МАГИЯ',hp:4450,speed:73,dmg:550,reload:1.6,range:340,proj:515,color:'#9b72f1',accent:'#ffe4ff',super:'ВОЛШЕБНАЯ РУКА',desc:'Снаряд распадается на искры, супер притягивает врага',counters:[3,23,18],weak:[10,12]},
  {name:'ПЕННИ',en:'Penny',cls:'КОНТРОЛЬ',role:'МОНЕТЫ',hp:4050,speed:73,dmg:660,reload:1.55,range:345,proj:470,color:'#cc79a7',accent:'#fff0df',super:'МОРТИРА',desc:'Монеты разлетаются после попадания, супер ставит мортиру',counters:[2,7,21],weak:[12,10]},
  {name:'8-БИТ',en:'8-Bit',cls:'СТРЕЛОК',role:'ЛАЗЕРНАЯ ОЧЕРЕДЬ',hp:5100,speed:56,dmg:215,reload:1.65,range:395,proj:690,color:'#65a9b6',accent:'#d8ffff',super:'УСИЛИТЕЛЬ УРОНА',desc:'Шесть лазерных пуль, усилитель урона для команды',counters:[2,7,4],weak:[8,9,10]},
- {name:'БЕА',en:'Bea',cls:'СТРЕЛОК',role:'ЗАРЯЖАЕМОЕ ЖАЛО',hp:2950,speed:76,dmg:650,reload:1.4,range:414,proj:640,color:'#f3c757',accent:'#fff8d2',super:'РОЙ',desc:'Попадание заряжает следующую атаку, супер замедляет',counters:[2,7,21],weak:[12,10]},
- {name:'МАКС',en:'Max',cls:'ПОДДЕРЖКА',role:'ЧЕТЫРЕ СКОРОСТНЫЕ ПУЛИ',hp:3850,speed:96,dmg:195,reload:1.22,range:284,proj:640,color:'#f2a44b',accent:'#fff4a9',super:'УСКОРЕНИЕ КОМАНДЫ',desc:'Быстрые очереди, супер ускоряет союзников',counters:[8,9,3],weak:[2,14]},
+ {name:'БЕА',en:'Bea',cls:'СТРЕЛОК',role:'ЗАРЯЖАЕМОЕ ЖАЛО',hp:2950,speed:76,dmg:650,reload:1.03,range:414,proj:640,color:'#f3c757',accent:'#fff8d2',super:'РОЙ',desc:'Один точный выстрел; попадание заряжает следующий, супер замедляет',counters:[2,7,21],weak:[12,10]},
+ {name:'МАКС',en:'Max',cls:'ПОДДЕРЖКА',role:'ЧЕТЫРЕ СКОРОСТНЫЕ ПУЛИ',hp:3850,speed:96,dmg:195,reload:1.22,range:284,proj:640,color:'#f2a44b',accent:'#fff4a9',super:'УСКОРЕНИЕ КОМАНДЫ',desc:'Четыре заряда атаки, супер ускоряет союзников',counters:[8,9,3],weak:[2,14]},
  {name:'СЭНДИ',en:'Sandy',cls:'КОНТРОЛЬ',role:'ПЕСЧАНЫЕ СНАРЯДЫ',hp:4250,speed:76,dmg:320,reload:1.48,range:263,proj:445,color:'#d6a66f',accent:'#ffeed0',super:'ПЕСЧАНАЯ БУРЯ',desc:'Широкая атака, супер прячет команду в песчаной буре',counters:[1,3,23],weak:[2,21]},
  {name:'РОЗА',en:'Rosa',cls:'ТАНК',role:'СЕРИЯ УДАРОВ',hp:7300,speed:67,dmg:265,reload:1.20,range:130,proj:440,color:'#73b96b',accent:'#e0fbc9',super:'ЗАЩИТНЫЕ ЛИАНЫ',desc:'Удары вблизи, супер надолго снижает урон',counters:[10,12,13],weak:[3,9,18]},
- {name:'ФРЭНК',en:'Frank',cls:'ТАНК',role:'УДАР МОЛОТОМ',hp:8350,speed:60,dmg:1100,reload:1.9,range:226,proj:410,color:'#8567a9',accent:'#e6d8fb',super:'ОГЛУШАЮЩАЯ ВОЛНА',desc:'Медленный удар по площади, супер оглушает врагов',counters:[2,7,21],weak:[8,9,18]},
+ {name:'ФРЭНК',en:'Frank',cls:'ТАНК',role:'УДАР МОЛОТОМ',hp:8350,speed:60,dmg:1100,reload:1.9,range:226,proj:410,color:'#8567a9',accent:'#e6d8fb',super:'ОГЛУШАЮЩАЯ ВОЛНА',desc:'Перед ударом замирает; мощный удар по площади и оглушение',counters:[2,7,21],weak:[8,9,18]},
  {name:'ПАЙПЕР',en:'Piper',cls:'СТРЕЛОК',role:'ДАЛЬНОБОЙНЫЙ ВЫСТРЕЛ',hp:3000,speed:76,dmg:1070,reload:2.04,range:530,proj:755,color:'#ed88ad',accent:'#ffecfa',super:'ПРЫЖОК И БОМБЫ',desc:'Урон растёт с дистанцией, супер отступает и оставляет бомбы',counters:[2,7,22],weak:[10,12,13]}
 ];
 const classColors={'ТАНК':'#ffbd74','МЕТАТЕЛЬ':'#fb9cb8','ПОДДЕРЖКА':'#80f9be','СТРЕЛОК':'#f8a8eb','УБИЙЦА':'#cf9fff','КОНТРОЛЬ':'#a9e6ff','УРОН':'#ffaf8e'};
@@ -333,17 +333,33 @@ function draftDraw(){
 }
 
 function modeChip(x,y,w,label,i){let on=modeIndex===i;rr(x,y,w,47,11,on?'#54a5eb':'#343055',on?'#b2ecff':'#666282',2);text((on?'✓  ':'')+label,x+w/2,y+24,17,'#fff','center',850);buttonRects.push({x,y,w,h:47,action:()=>modeIndex=i})}
-function makeActor(id,side,type,pos,bot=true){let h=heroes[type];return{id,side,type,bot,x:pos.x,y:pos.y,hp:h.hp,max:h.hp,cd:bot?rnd(1.0,1.8):.16,ammo:3,ammoTick:0,lastHit:0,gems:0,burn:0,burnOwner:null,sup:0,shield:0,power:0,alive:true,respawn:0,aim:{x:0,y:side===0?-1:1},kills:0,walk:rnd(0,7),dodge:rnd(0,7),aura:0,stun:0,regen:0,slow:0,poison:0,poisonTick:0,poisonOwner:null,invis:0,haste:0,beeCharged:false,botThought:rnd(.3,1),mind:'',lastSpot:null,strafeDir:Math.random()<.5?-1:1}}
+function makeActor(id,side,type,pos,bot=true){let h=heroes[type],ammoMax=type===18?1:type===19?4:3;return{id,side,type,bot,x:pos.x,y:pos.y,vx:0,vy:0,movePower:0,stepDust:0,attackFlash:0,hitFlash:0,root:0,hp:h.hp,max:h.hp,cd:bot?rnd(1.0,1.8):.16,ammo:ammoMax,ammoMax,ammoTick:0,lastHit:0,gems:0,burn:0,burnOwner:null,sup:0,shield:0,power:0,alive:true,respawn:0,aim:{x:0,y:side===0?-1:1},kills:0,walk:rnd(0,7),dodge:rnd(0,7),aura:0,stun:0,regen:0,slow:0,poison:0,poisonTick:0,poisonOwner:null,invis:0,haste:0,beeCharged:false,botThought:rnd(.3,1),mind:'',lastSpot:null,strafeDir:Math.random()<.5?-1:1}}
 function startMatch(){if(!draft||draft.picks.some(x=>x<0))return;
  modeIndex=draft.mode;mapIndex=draft.map;modifierIndex=draft.modifier;applyMap(mapIndex);
  match={mode:modeIndex,map:mapIndex,modifier:modifierIndex,phase:'play',time:modeIndex===0?125:modeIndex===4?205:190,score:[0,0],round:1,wins:[0,0],countdown:0,msg:'',actors:[],bullets:[],mines:[],turrets:[],hazards:[],delayed:[],gems:[],gemTimer:1.5,gemCountdown:0,gemLeader:-1,zoneProgress:[0,0],zone:{x:640,y:660,r:105},dualZones:[{x:464,y:615,r:90},{x:817,y:706,r:90}],dualScore:[0,0],vaults:[{x:640,y:1090,side:0,hp:16500,max:16500},{x:640,y:230,side:1,hp:16500,max:16500}],cart:{x:640,y:660,progress:0},bounty:[0,0],cool:0,playerId:0,net:0,picks:[...draft.picks],bestOf:draft.bestOf,seriesWins:[0,0],seriesGame:1,rated:!draft.practice,oldPoints:rankPoints};
- spawnAll();particles=[];screen='battle';resetPointers();controls.fire={x:0,y:-1};controls.superAim={x:0,y:-1};last=performance.now();
+ spawnAll();particles=[];screen='battle';resetPointers();controls.fire={x:0,y:-1};controls.superAim={x:0,y:-1};cameraY=cap(match.actors[0].y-380,0,FIELD.bottom-480);last=performance.now();
 }
 function spawnAll(){let m=match;m.actors=[];m.bullets=[];m.mines=[];m.turrets=[];m.hazards=[];m.delayed=[];m.gems=[];const pts=[{x:640,y:1180},{x:495,y:1170},{x:785,y:1170},{x:495,y:150},{x:640,y:140},{x:785,y:150}];for(let i=0;i<6;i++)m.actors.push(makeActor(i,i<3?0:1,m.picks[i],pts[i],i!==0))}
 function circleRect(cx,cy,r,b){let x=cap(cx,b.x,b.x+b.w),y=cap(cy,b.y,b.y+b.h);return (cx-x)**2+(cy-y)**2<r*r}
 function validMove(a,x,y){if(x<FIELD.left+23||x>FIELD.right-23||y<FIELD.top+23||y>FIELD.bottom-23)return false;for(let w of walls)if(circleRect(x,y,23,w))return false;return true}
-function moveA(a,dx,dy,dt){let sp=heroes[a.type].speed*(a.bot?.94:1)*(a.shield>0?.92:1)*(a.slow>0?.58:1)*(a.haste>0?1.27:1);let nx=a.x+dx*sp*dt,ny=a.y+dy*sp*dt;if(validMove(a,nx,a.y))a.x=nx;if(validMove(a,a.x,ny))a.y=ny}
-function closestEnemy(a){let best=null,d=1e9;for(let b of match.actors){if(b.alive&&b.side!==a.side&&(!a.bot||teamCanSee(b,a.side))){let nd=dist(a,b);if(nd<d){d=nd;best=b}}}return best}
+function moveA(a,dx,dy,dt){
+ // Analog movement: the thumbstick controls speed, not just direction.
+ const input=Math.hypot(dx,dy);if(input<.035||dt<=0){a.vx=0;a.vy=0;a.movePower=0;return;}
+ const magnitude=Math.min(1,input),n={x:dx/input,y:dy/input};
+ const sp=heroes[a.type].speed*(a.bot?.94:1)*(a.shield>0?.92:1)*(a.slow>0?.58:1)*(a.haste>0?1.27:1)*magnitude;
+ const ox=a.x,oy=a.y,nx=ox+n.x*sp*dt,ny=oy+n.y*sp*dt;
+ // Sliding on a wall preserves the other axis, so controls do not stick.
+ if(validMove(a,nx,a.y))a.x=nx;
+ if(validMove(a,a.x,ny))a.y=ny;
+ a.vx=(a.x-ox)/dt;a.vy=(a.y-oy)/dt;a.movePower=Math.hypot(a.vx,a.vy)/Math.max(1,heroes[a.type].speed);
+ a.stepDust=(a.stepDust||0)-dt;
+ if(a.movePower>.35&&a.stepDust<=0&&particles.length<160){
+   particles.push({x:a.x+rnd(-9,9),y:a.y+18,vx:rnd(-20,20),vy:rnd(4,18),life:.23,total:.23,r:rnd(2,4),color:'#e8e2b9'});
+   a.stepDust=.16;
+ }
+}
+
+function closestEnemy(a){let best=null,d=1e9;for(let b of match.actors){if(b.alive&&b.side!==a.side&&teamCanSee(b,a.side)){let nd=dist(a,b);if(nd<d){d=nd;best=b}}}return best}
 function burst(x,y,color,n=10){for(let i=0;i<n;i++)particles.push({x,y,vx:rnd(-145,145),vy:rnd(-145,145),life:rnd(.24,.65),total:.65,r:rnd(2,6),color})}
 function addBullet(a,dir,damageScale=1,extra={}){
  const h=heroes[a.type],lob=extra.lob??(a.type===8||a.type===9);
@@ -378,7 +394,7 @@ function shoot(a,aim,superShot=false,chosenDistance=null){
   case 7:for(let i=0;i<4;i++)queueAngle(a,angle+(i%2?.12:-.12),i*.07,1,{...opts,rad:13,pierce:0,kind:'fist'});break;
   case 8:queueAngle(a,angle,0,.46,{...opts,lob:true,splash:45,hazard:'barley',rad:12});break;
   case 9:for(let i of [-1,1])queueAngle(a,angle+i*.09,(i+1)*.11,.62,{...opts,lob:true,splash:72,rad:11,kind:'dynamite'});break;
-  case 10:{let nx=a.x,ny=a.y;for(let i=0;i<8;i++){let x=a.x+aim.x*(i+1)*12,y=a.y+aim.y*(i+1)*12;if(validMove(a,x,y)){nx=x;ny=y}else break;}a.x=nx;a.y=ny;
+  case 10:{let nx=a.x,ny=a.y;const dash=Math.min(125,Math.max(25,range)),steps=Math.ceil(dash/10);for(let i=0;i<steps;i++){let x=a.x+aim.x*Math.min(dash,(i+1)*10),y=a.y+aim.y*Math.min(dash,(i+1)*10);if(validMove(a,x,y)){nx=x;ny=y}else break;}a.x=nx;a.y=ny;
     for(let b of match.actors)if(b.alive&&b.side!==a.side&&dist(a,b)<84&&Math.abs(Math.atan2(b.y-a.y,b.x-a.x)-angle)<2)damage(b,h.dmg*(a.bot?.74:1),a);
     burst(a.x,a.y,h.color,14);break;}
   case 11:queueAngle(a,angle,0,.85,{...opts,split:true,rad:12});break;
@@ -396,7 +412,11 @@ function shoot(a,aim,superShot=false,chosenDistance=null){
   case 23:queueAngle(a,angle,0,1,{...opts,rad:8,kind:'piper'});break;
  }
  a.ammo=Math.max(0,a.ammo-1);if(a.ammoTick<=0)a.ammoTick=h.reload;
- a.cd=.20*(a.bot?1.7:1);a.lastHit=0;
+ // Individual attack recovery gives snipers, tanks and assassins different rhythms.
+ const recovery={0:.29,1:.18,2:.32,3:.37,7:.19,10:.23,17:.19,18:.19,19:.16,22:.56,23:.39}[a.type]??.24;
+ a.cd=recovery*(a.bot?1.7:1);a.lastHit=0;a.attackFlash=.16;
+ if(a.type===22)a.root=.44; // Frank stops briefly while winding up the hammer.
+
  burst(a.x+aim.x*26,a.y+aim.y*26,h.color,4);return true;
 }
 function placeHazard(x,y,r,side,owner,kind,life=3.0,dmg=145){
@@ -462,12 +482,15 @@ function explode(x,y,r,amount,owner,side){burst(x,y,'#ffc26f',18);
 function damage(b,amount,attacker){
  if(!b.alive)return;
  if(b.shield>0)amount*=.45;
- b.hp-=amount;b.lastHit=0;burst(b.x,b.y,heroes[b.type].color,3);
+ b.hp-=amount;b.lastHit=0;b.hitFlash=.18;burst(b.x,b.y,heroes[b.type].color,3);
+ // Tank trait: taking damage also charges a little super, even without attacking.
+ if(heroes[b.type].cls==='ТАНК')b.sup=cap(b.sup+Math.min(7,amount/290),0,100);
+
  if(attacker)attacker.sup=cap(attacker.sup+(match.modifier===1?19:12),0,100);
  if(b.hp<=0){
   b.hp=0;b.alive=false;burst(b.x,b.y,'#ffe9aa',27);
   if(match.mode===1&&b.gems){for(let k=0;k<b.gems;k++){const angle=k*2.4;match.gems.push({x:cap(b.x+Math.cos(angle)*Math.sqrt(k)*13,FIELD.left+25,FIELD.right-25),y:cap(b.y+Math.sin(angle)*Math.sqrt(k)*13,FIELD.top+25,FIELD.bottom-25)});}b.gems=0;}
-  if(attacker){attacker.kills++;if(match.mode===3){match.bounty[attacker.side]+=2;match.score=[...match.bounty];if(match.bounty[attacker.side]>=20)finish(attacker.side);}}
+  if(attacker){attacker.kills++;if(heroes[attacker.type].cls==='УБИЙЦА')attacker.haste=Math.max(attacker.haste,1.0);if(match.mode===3){match.bounty[attacker.side]+=2;match.score=[...match.bounty];if(match.bounty[attacker.side]>=20)finish(attacker.side);}}
   if(match.mode!==0)b.respawn=5.4;
  }
 }
@@ -585,9 +608,9 @@ function updateBattle(dt){
  if(!match||match.phase!=='play')return;
  const m=match;m.time=Math.max(0,m.time-dt);
  for(let a of m.actors){
-  a.cd=Math.max(0,a.cd-dt);a.invis=Math.max(0,(a.invis||0)-dt);a.haste=Math.max(0,(a.haste||0)-dt);a.power=Math.max(0,a.power-dt);a.shield=Math.max(0,a.shield-dt);a.stun=Math.max(0,a.stun-dt);a.slow=Math.max(0,a.slow-dt);
+  a.cd=Math.max(0,a.cd-dt);a.root=Math.max(0,(a.root||0)-dt);a.attackFlash=Math.max(0,(a.attackFlash||0)-dt);a.hitFlash=Math.max(0,(a.hitFlash||0)-dt);a.vx=0;a.vy=0;a.movePower=0;a.invis=Math.max(0,(a.invis||0)-dt);a.haste=Math.max(0,(a.haste||0)-dt);a.power=Math.max(0,a.power-dt);a.shield=Math.max(0,a.shield-dt);a.stun=Math.max(0,a.stun-dt);a.slow=Math.max(0,a.slow-dt);
   a.lastHit+=dt;
-  if(a.ammo<3){a.ammoTick-=dt*(a.power>0?1.18:1);if(a.ammoTick<=0){a.ammo=Math.min(3,a.ammo+1);a.ammoTick=a.ammo<3?heroes[a.type].reload:0}}
+  if(a.ammo<a.ammoMax){a.ammoTick-=dt*(a.power>0?1.18:1);if(a.ammoTick<=0){a.ammo=Math.min(a.ammoMax,a.ammo+1);a.ammoTick=a.ammo<a.ammoMax?heroes[a.type].reload:0}}
   if(!a.alive){if(m.mode!==0){a.respawn-=dt;if(a.respawn<=0){const n=makeActor(a.id,a.side,a.type,{x:495+(a.id%3)*145,y:a.side===0?1170:150},a.bot);Object.assign(a,n);burst(a.x,a.y,'#fff',15)}}continue}
   a.walk+=dt*4;
   if(a.lastHit>4.2&&a.hp<a.max)a.hp=Math.min(a.max,a.hp+a.max*(m.modifier===2?.092:.057)*dt);
@@ -595,7 +618,13 @@ function updateBattle(dt){
   if(a.poison>0){a.poison-=dt;a.poisonTick-=dt;if(a.poisonTick<=0){a.poisonTick=.6;damage(a,95,a.poisonOwner!==null?m.actors[a.poisonOwner]:null)}}
   if(!a.alive||a.stun>0)continue;
   
-  if(!a.bot){let mx=controls.move.x,my=controls.move.y;if(keys.has('w')||keys.has('arrowup'))my-=1;if(keys.has('s')||keys.has('arrowdown'))my+=1;if(keys.has('a')||keys.has('arrowleft'))mx-=1;if(keys.has('d')||keys.has('arrowright'))mx+=1;let d=norm(mx,my);if(Math.hypot(mx,my)>.08)moveA(a,d.x,d.y,dt);if(controls.superId!==null)a.aim=controls.superAim;else if(controls.fireId!==null||controls.mouseAimId!==null)a.aim=controls.fire}
+  if(!a.bot){
+    let mx=controls.move.x,my=controls.move.y;
+    if(keys.has('w')||keys.has('arrowup'))my-=1;if(keys.has('s')||keys.has('arrowdown'))my+=1;
+    if(keys.has('a')||keys.has('arrowleft'))mx-=1;if(keys.has('d')||keys.has('arrowright'))mx+=1;
+    const len=Math.hypot(mx,my);if(len>.07&&a.root<=0)moveA(a,mx/Math.max(1,len),my/Math.max(1,len),dt);
+    if(controls.superId!==null)a.aim=controls.superAim;else if(controls.fireId!==null||controls.mouseAimId!==null)a.aim=controls.fire;
+  }
   else {
     const target=pickBotTarget(a),h=heroes[a.type],cl=h.cls,range=h.range;
     a.botThought-=dt;
@@ -613,7 +642,7 @@ function updateBattle(dt){
     // Objective modes override pure chasing until a threat is close.
     if((m.mode===1||m.mode===2||m.mode===5)&&(!target||d>225))goal=tacticalGoal(a,null);
     if(m.mode===4&&(!target||d>185))goal=m.vaults[1-a.side];
-    steerBot(a,goal,dt);
+    if(a.root<=0)steerBot(a,goal,dt);
     if(target){
       const n=norm(target.x-a.x,target.y-a.y);a.aim=n;
       if(a.botThought<=0){
@@ -693,7 +722,7 @@ function resetSeriesGame(){
  m.msg='';m.phase='play';m.gems=[];m.gemTimer=1.5;m.gemCountdown=0;m.gemLeader=-1;
  m.zoneProgress=[0,0];m.dualScore=[0,0];m.bounty=[0,0];
  m.vaults=[{x:640,y:1090,side:0,hp:16500,max:16500},{x:640,y:230,side:1,hp:16500,max:16500}];
- spawnAll();particles=[];
+ spawnAll();particles=[];cameraY=cap(m.actors[0].y-380,0,FIELD.bottom-480);
 }
 function finish(winner){
  const m=match;
@@ -776,9 +805,16 @@ function drawObjectives(m){
  }
 }
 function drawAmmo(p){
+ const count=p.ammoMax||3,cell=count===4?46:57,step=count===4?51:66;
  text('БОЕЗАПАС',513,706,11,'#adbedd');
- for(let i=0;i<3;i++){const fill=cap(p.ammo-i,0,1);rr(587+i*66,702,57,12,5,'#272a4d','#72809c',1);if(fill>0)rr(590+i*66,705,51*fill,6,3,'#ffc744');}
+ for(let i=0;i<count;i++){
+   const fill=cap(p.ammo-i,0,1),x=587+i*step;
+   rr(x,702,cell,12,5,'#272a4d','#72809c',1);
+   if(fill>0)rr(x+3,705,(cell-6)*fill,6,3,'#ffc744');
+   else if(i===Math.floor(p.ammo)&&p.ammoTick>0)rr(x+3,705,(cell-6)*(1-p.ammoTick/heroes[p.type].reload),6,3,'#7c82c4');
+ }
 }
+
 
 function resultDraw(){
  backdrop();header('РЕЗУЛЬТАТ · РАНГОВЫЙ 2025','Рейтинговая серия завершена');
@@ -796,33 +832,22 @@ function resultDraw(){
 }
 
 function drawCombat(){backdrop();const m=match;
- const playerCamera=m.actors[0];cameraY=Math.max(0,Math.min(FIELD.bottom-480,playerCamera.y-380));
+ const playerCamera=m.actors[0],targetCamera=cap(playerCamera.y-380,0,FIELD.bottom-480);cameraY+=(targetCamera-cameraY)*Math.min(1,renderDt*10);
  c.save();c.beginPath();c.rect(275,132,730,492);c.clip();c.translate(0,132-cameraY);
  arena();drawObjectives(m);
  for(let hz of m.hazards){c.save();c.globalAlpha=.16+.18*Math.sin(tick*6)**2;c.beginPath();c.arc(hz.x,hz.y,hz.r,0,TAU);c.fillStyle=hz.kind==='thorns'?'#74df4c':hz.kind==='sandstorm'?'#e9cf9a':hz.kind==='honey'?'#f4c956':'#ffa44c';c.fill();c.strokeStyle=hz.kind==='thorns'?'#b5ff83':hz.kind==='sandstorm'?'#ffee9d':'#ffcc89';c.lineWidth=3;c.stroke();c.restore()}
  for(let t of m.turrets){c.save();c.translate(t.x,t.y);ellipse(0,7,22,9,'#0005');ellipse(0,0,t.kind==='bear'?21:16,t.kind==='bear'?21:16,t.kind==='bear'?'#e47e57':'#d3b357');if(t.kind==='bear'){ellipse(-8,-12,7,7,'#a95640');ellipse(8,-12,7,7,'#a95640');ellipse(-6,-1,3,3,'#fff');ellipse(6,-1,3,3,'#fff')}else{rr(-9,-6,18,13,3,'#425b75');ellipse(0,0,5,5,'#fff3c4')}c.restore()}
-drawAimPreview(m.actors[0]);for(let mine of m.mines){c.beginPath();c.arc(mine.x,mine.y,22+Math.sin(tick*12)*4,0,TAU);c.fillStyle='#ff994e';c.fill();text('!',mine.x,mine.y,25,'#502222','center')}for(let turret of m.turrets){if(turret.kind==='bear')text('МЕДВЕДЬ',turret.x,turret.y-31,10,'#f1ffc0','center');else text(turret.kind==='booster'?'УСИЛИТЕЛЬ':turret.kind==='mortar'?'МОРТИРА':'ТУРЕЛЬ',turret.x,turret.y-31,10,'#f1ffc0','center')}for(let b of m.bullets)drawProjectile(b);for(let a of m.actors){if(!a.alive||!visibleEnemy(a))continue;let h=heroes[a.type];if(a.shield>0){c.beginPath();c.arc(a.x,a.y,35,0,TAU);c.strokeStyle='#fdf4a2';c.lineWidth=6;c.stroke()}if(a.power>0){c.beginPath();c.arc(a.x,a.y,32,0,TAU);c.strokeStyle='#ff91f4';c.lineWidth=3;c.stroke();}if(a.stun>0){star(a.x,a.y-32,9,'#ffdf69')}iconFighter(a.x,a.y,22,a.type,a.side,a.invis>0?.52:1);c.strokeStyle='#fff9';c.lineWidth=3;c.beginPath();c.moveTo(a.x+a.aim.x*17,a.y+a.aim.y*17);c.lineTo(a.x+a.aim.x*32,a.y+a.aim.y*32);c.stroke();rr(a.x-28,a.y-43,56,8,4,'#1a1f35');rr(a.x-28,a.y-43,Math.max(0,56*a.hp/a.max),8,4,a.side===0?'#52eabe':'#ff6c83');text(a.bot?(a.side===0?'СОЮЗНИК':'ВРАГ'):'ТЫ',a.x,a.y-55,11,'#fff','center',900,true);text(h.name,a.x,a.y+39,10,h.color,'center',900,true);if(a.gems>0){star(a.x+30,a.y-32,10,'#f6b0ff',6);text(a.gems,a.x+43,a.y-34,13,'#fff','center',950,true)}}for(let p of particles){c.save();c.globalAlpha=Math.max(0,p.life/p.total);ellipse(p.x,p.y,p.r,p.r,p.color);c.restore()}
+drawAimPreview(m.actors[0]);for(let mine of m.mines){c.beginPath();c.arc(mine.x,mine.y,22+Math.sin(tick*12)*4,0,TAU);c.fillStyle='#ff994e';c.fill();text('!',mine.x,mine.y,25,'#502222','center')}for(let turret of m.turrets){if(turret.kind==='bear')text('МЕДВЕДЬ',turret.x,turret.y-31,10,'#f1ffc0','center');else text(turret.kind==='booster'?'УСИЛИТЕЛЬ':turret.kind==='mortar'?'МОРТИРА':'ТУРЕЛЬ',turret.x,turret.y-31,10,'#f1ffc0','center')}for(let b of m.bullets)drawProjectile(b);for(let a of m.actors){if(!a.alive||!visibleEnemy(a))continue;let h=heroes[a.type];if(a.shield>0){c.beginPath();c.arc(a.x,a.y,35,0,TAU);c.strokeStyle='#fdf4a2';c.lineWidth=6;c.stroke()}if(a.power>0){c.beginPath();c.arc(a.x,a.y,32,0,TAU);c.strokeStyle='#ff91f4';c.lineWidth=3;c.stroke();}if(a.stun>0){star(a.x,a.y-32,9,'#ffdf69')}
+ const bounce=a.movePower>.08?Math.sin(a.walk*2.1)*2.2*a.movePower:0;
+ iconFighter(a.x,a.y+bounce,22,a.type,a.side,a.invis>0?.52:1);
+ if(a.hitFlash>0){c.beginPath();c.arc(a.x,a.y,28,0,TAU);c.strokeStyle='#ffffff'+Math.round(180*a.hitFlash/.18).toString(16).padStart(2,'0');c.lineWidth=4;c.stroke()}
+ if(a.attackFlash>0){ellipse(a.x+a.aim.x*34,a.y+a.aim.y*34,6+7*a.attackFlash/.16,6+7*a.attackFlash/.16,'#ffe8a2b0')}
+c.strokeStyle='#fff9';c.lineWidth=3;c.beginPath();c.moveTo(a.x+a.aim.x*17,a.y+a.aim.y*17);c.lineTo(a.x+a.aim.x*32,a.y+a.aim.y*32);c.stroke();rr(a.x-28,a.y-43,56,8,4,'#1a1f35');rr(a.x-28,a.y-43,Math.max(0,56*a.hp/a.max),8,4,a.side===0?'#52eabe':'#ff6c83');text(a.bot?(a.side===0?'СОЮЗНИК':'ВРАГ'):'ТЫ',a.x,a.y-55,11,'#fff','center',900,true);text(h.name,a.x,a.y+39,10,h.color,'center',900,true);if(a.gems>0){star(a.x+30,a.y-32,10,'#f6b0ff',6);text(a.gems,a.x+43,a.y-34,13,'#fff','center',950,true)}}for(let p of particles){c.save();c.globalAlpha=Math.max(0,p.life/p.total);ellipse(p.x,p.y,p.r,p.r,p.color);c.restore()}
 c.restore();
 rr(40,20,500,96,15,'#12152bdd','#52638b55');rr(736,20,505,96,15,'#12152bdd','#52638b55');text('СИНИЕ',81,48,18,'#9cdeff');text('КРАСНЫЕ',1200,48,18,'#ffaebf','right');if(m.mode===0){text(m.wins[0]+'  :  '+m.wins[1],640,64,50,'white','center',1000,true);text('РАУНД '+m.round+(m.bestOf===3?' · СЕРИЯ '+m.seriesWins[0]+':'+m.seriesWins[1]:''),638,105,14,'#c7d4e8','center')}
  else{text(m.score[0]+'   :   '+m.score[1],640,64,50,'white','center',1000,true);text(m.mode===1?(m.gemLeader<0?'СОБЕРИ 10 КРИСТАЛЛОВ':'ПОБЕДА ЧЕРЕЗ '+Math.ceil(m.gemCountdown)+' СЕК'):m.mode===2?'ПЕРВЫЙ ДО 100%':m.mode===3?'ПЕРВЫЙ ДО 20 ЗВЁЗД':m.mode===4?'УНИЧТОЖЬ ЧУЖОЙ СЕЙФ':'ПЕРВЫЙ ДО 120 ОЧКОВ',639,105,14,'#c7d4e8','center')}
  if(m.bestOf===3&&m.mode!==0)text('СЕРИЯ '+m.seriesWins[0]+' : '+m.seriesWins[1],640,125,17,'#ffe68f','center');text(MODE_DATA[m.mode].name,84,86,16,'#d2d9ee');text(MAPS[m.map].name+' · '+rankName(),1196,86,14,colors.yellow,'right');text(MODIFIERS[m.modifier].name,1196,106,11,'#cfc6ef','right');let ss=Math.ceil(m.time),timeStr=String(Math.floor(ss/60)).padStart(2,'0')+':'+String(ss%60).padStart(2,'0');rr(567,18,148,25,12,'#0009');text(timeStr,641,30,18,'#fff','center',900);
 const player=m.actors[0];rr(465,650,344,47,12,'#13132fdc','#42486b');text(heroes[player.type].name,483,673,16,'#fff');rr(589,662,176,15,8,'#0d1030');rr(589,662,176*player.hp/player.max,15,8,'#56dfad');text(Math.ceil(player.hp)+' / '+player.max,675,684,12,'#fff','center');text('УЛЬТА: '+heroes[player.type].super,820,678,13,'#f7df88');text(heroes[player.type].cls+' · СКОР. '+heroes[player.type].speed,470,695,12,classColors[heroes[player.type].cls]);drawAmmo(player);drawControls(player);if(m.phase==='round'||m.phase==='series'){rr(360,291,560,114,18,'#14122de9','#ffe28e',3);text(m.msg,640,337,30,'#fff','center',1000);text(m.phase==='series'?'СЛЕДУЮЩАЯ ИГРА СЕРИИ...':'СЛЕДУЮЩИЙ РАУНД...',640,379,19,'#ffe08d','center')}}
-// While held, the attack / super joystick is ONLY an aiming control.
-// The attack or super is executed once on pointerup (not every frame).
-function aimFor(a,kind,point){
- const base=kind==='super'?{x:965,y:588}:{x:1127,y:546};
- const delta={x:point.x-base.x,y:point.y-base.y};
- if(Math.hypot(delta.x,delta.y)>15)return norm(delta.x,delta.y);
- const enemy=closestEnemy(a);
- // Tapping the center auto-aims at the nearest enemy when available.
- return enemy&&dist(a,enemy)<425?norm(enemy.x-a.x,enemy.y-a.y):{...a.aim};
-}
-function aimWorld(a,point){return norm(point.x-a.x,point.y-a.y)}
-function dragDistance(point,kind,a){const base=kind==='super'?{x:965,y:588}:{x:1127,y:546};const d=Math.hypot(point.x-base.x,point.y-base.y);const max=aimDistance(a,kind);return d<15?max:Math.max(45,Math.min(max,max*(d/105)));}
-function aimDistance(a,kind){
- if(kind==='fire')return heroes[a.type].range;
- return [350,590,360,370,125,110,360,240,295,300,385,290,85,220,250,440,195,100,285,385,175,75,260,198][a.type];
-}
 function drawAimPreview(p){
  if(!p||!p.alive||match.phase!=='play')return;
  const isSuper=controls.superId!==null;
@@ -830,6 +855,7 @@ function drawAimPreview(p){
  const dir=isSuper?controls.superAim:controls.fire;
  const h=heroes[p.type],distance=(isSuper?controls.superDistance:controls.fireDistance)??aimDistance(p,isSuper?'super':'fire');
  const col=isSuper?'#ffdf62':'#e1f8ff';
+ if(isSuper?controls.superCancel:controls.fireCancel){text('ОТПУСТИ — ОТМЕНА',835,456,18,'#ff8f9d','center',1000,true);return;}
  c.save();c.beginPath();c.rect(FIELD.left,FIELD.top,FIELD.right-FIELD.left,FIELD.bottom);c.clip();
  // Reveal the effective area for non-directional supers.
  const circleSuper=isSuper&&[6,12,19,21].includes(p.type);
@@ -861,12 +887,51 @@ function drawAimPreview(p){
  c.restore();
  text(isSuper?'ОТПУСТИ: УЛЬТА':'ОТПУСТИ: ВЫСТРЕЛ',850,451,17,isSuper?'#ffe17b':'#d6f7ff','center',900,true);
 }
+const MOVE_HOME={x:144,y:552},ATTACK_HOME={x:1127,y:546},SUPER_HOME={x:965,y:588};
+const CANCEL_ZONE={x:824,y:556,r:46};
+const controls={moveId:null,fireId:null,superId:null,mouseAimId:null,
+ moveCenter:{...MOVE_HOME},move:{x:0,y:0},fire:{x:0,y:-1},superAim:{x:0,y:-1},
+ fireDistance:null,superDistance:null,fireStart:null,superStart:null,
+ fireMoved:false,superMoved:false,fireCancel:false,superCancel:false};
+let keys=new Set(),mouse={x:0,y:0};
+function pointerPos(e){let r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
+function findAutoTarget(a,kind){
+ if(!match)return null;
+ const lob=[8,9].includes(a.type),range=aimDistance(a,kind);
+ const choices=match.actors.filter(b=>b.alive&&b.side!==a.side&&teamCanSee(b,a.side)
+    &&dist(a,b)<=range+24&&(lob||lineClear(a,b)||kind==='super'));
+ choices.sort((u,v)=>dist(a,u)-dist(a,v));return choices[0]||null;
+}
+function predictiveAim(a,b){
+ const speed=heroes[a.type].proj*.78,flight=Math.min(.38,dist(a,b)/Math.max(100,speed));
+ const tx=cap(b.x+(b.vx||0)*flight*.70,FIELD.left+25,FIELD.right-25);
+ const ty=cap(b.y+(b.vy||0)*flight*.70,FIELD.top+25,FIELD.bottom-25);
+ return norm(tx-a.x,ty-a.y);
+}
+function aimFor(a,kind,point){
+ const base=kind==='super'?SUPER_HOME:ATTACK_HOME;
+ const delta={x:point.x-base.x,y:point.y-base.y};
+ if(Math.hypot(delta.x,delta.y)>16)return norm(delta.x,delta.y);
+ const target=findAutoTarget(a,kind);
+ return target?predictiveAim(a,target):{...a.aim};
+}
+function aimWorld(a,point){return norm(point.x-a.x,point.y-a.y)}
+function aimDistance(a,kind){
+ if(kind==='fire')return heroes[a.type].range;
+ return [350,590,360,370,125,110,360,240,295,300,385,290,85,220,250,440,195,100,285,385,175,75,260,198][a.type];
+}
+function dragDistance(point,kind,a){
+ const base=kind==='super'?SUPER_HOME:ATTACK_HOME,d=Math.hypot(point.x-base.x,point.y-base.y),max=aimDistance(a,kind);
+ return d<16?max:Math.max(35,Math.min(max,max*(d/115)));
+}
 function drawControls(p){
  const ml=controls.moveId!==null,fl=controls.fireId!==null,sl=controls.superId!==null;
- const bx=144,by=552,ex=1127,ey=546,sx=965,sy=588;
- ellipse(bx,by,92,92,'#111638b2');
- c.beginPath();c.arc(bx,by,88,0,TAU);c.strokeStyle='#a5d2ff55';c.lineWidth=4;c.stroke();
- ellipse(bx+controls.move.x*48,by+controls.move.y*48,40,40,ml?'#8fd0ffac':'#7186b46b');
+ const bx=ml?controls.moveCenter.x:MOVE_HOME.x,by=ml?controls.moveCenter.y:MOVE_HOME.y;
+ const ex=ATTACK_HOME.x,ey=ATTACK_HOME.y,sx=SUPER_HOME.x,sy=SUPER_HOME.y;
+ ellipse(bx,by,91,91,ml?'#142c50c9':'#111638b2');
+ c.beginPath();c.arc(bx,by,83,0,TAU);c.strokeStyle=ml?'#b8ecff':'#a5d2ff55';c.lineWidth=4;c.stroke();
+ ellipse(bx+controls.move.x*57,by+controls.move.y*57,39,39,ml?'#8fd0ffdd':'#7186b46b');
+ if(ml){c.beginPath();c.arc(bx+controls.move.x*57,by+controls.move.y*57,17,0,TAU);c.fillStyle='#f0faff66';c.fill()}
  ellipse(ex,ey,79,79,p.ammo<1?'#24264099':fl?'#79344fbb':'#511e4a91');
  c.beginPath();c.arc(ex,ey,77,0,TAU);c.strokeStyle=fl?'#ffebdf':'#ff9ca4a0';c.lineWidth=fl?6:4;c.stroke();
  const fx=ex+(fl?controls.fire.x*36:0),fy=ey+(fl?controls.fire.y*36:0);
@@ -876,41 +941,73 @@ function drawControls(p){
  const ux=sx+(sl?controls.superAim.x*19:0),uy=sy+(sl?controls.superAim.y*19:0);
  star(ux,uy,25,sl?'#fff6c2':p.sup>=100?'#fff7a0':'#ab9ad7');
  text(Math.floor(p.sup)+'%',sx,627,13,'#fff','center');
+ if(fl||sl){
+   const cancelled=controls.fireCancel||controls.superCancel;
+   ellipse(CANCEL_ZONE.x,CANCEL_ZONE.y,CANCEL_ZONE.r,CANCEL_ZONE.r,cancelled?'#d94b5bdc':'#512d49b5');
+   c.beginPath();c.arc(CANCEL_ZONE.x,CANCEL_ZONE.y,CANCEL_ZONE.r,0,TAU);
+   c.strokeStyle=cancelled?'#ffffff':'#f69ca8';c.lineWidth=4;c.stroke();
+   text('×',CANCEL_ZONE.x,CANCEL_ZONE.y-5,42,'#fff','center',900);
+   text('ОТМЕНА',CANCEL_ZONE.x,CANCEL_ZONE.y+25,11,'#fff','center',900);
+ }
+ if(tick<12)text('ЛЕВЫЙ: ДВИЖЕНИЕ   ·   ПРАВЫЙ: ТЯНИ И ОТПУСКАЙ   ·   НАЖМИ: АВТОПРИЦЕЛ',644,638,12,'#d7e8ff','center');
  rr(16,27,38,38,8,'#1d1b44','#7884b0');text('Ⅱ',35,47,22,'#fff','center');
 }
-function resetPointers(){controls.moveId=null;controls.fireId=null;controls.superId=null;controls.mouseAimId=null;controls.move={x:0,y:0};controls.fireDistance=null;controls.superDistance=null}
-let keys=new Set(),mouse={x:0,y:0};
-const controls={moveId:null,fireId:null,superId:null,mouseAimId:null,move:{x:0,y:0},fire:{x:1,y:0},superAim:{x:1,y:0},fireDistance:null,superDistance:null};
-function pointerPos(e){let r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
+function resetPointers(){
+ controls.moveId=null;controls.fireId=null;controls.superId=null;controls.mouseAimId=null;
+ controls.move={x:0,y:0};controls.moveCenter={...MOVE_HOME};
+ controls.fireDistance=null;controls.superDistance=null;controls.fireStart=null;controls.superStart=null;
+ controls.fireMoved=false;controls.superMoved=false;controls.fireCancel=false;controls.superCancel=false;
+}
 function controlUpdate(id,p){
+ if(!match||!match.actors[0])return;
+ const a=match.actors[0];
  if(id===controls.moveId){
-   let dx=p.x-144,dy=p.y-552,len=Math.hypot(dx,dy),v=Math.min(len/67,1);
-   controls.move=norm(dx,dy);controls.move.x*=v;controls.move.y*=v;
+   const dx=p.x-controls.moveCenter.x,dy=p.y-controls.moveCenter.y,len=Math.hypot(dx,dy);
+   const power=len<=9?0:Math.min(1,(len-9)/70);
+   controls.move=power?{x:dx/len*power,y:dy/len*power}:{x:0,y:0};
  }else if(id===controls.fireId){
-   controls.fire=aimFor(match.actors[0],'fire',p);controls.fireDistance=dragDistance(p,'fire',match.actors[0]);
+   controls.fireMoved=controls.fireMoved||Math.hypot(p.x-controls.fireStart.x,p.y-controls.fireStart.y)>16;
+   controls.fireCancel=Math.hypot(p.x-CANCEL_ZONE.x,p.y-CANCEL_ZONE.y)<CANCEL_ZONE.r;
+   controls.fire=controls.fireMoved?aimFor(a,'fire',p):aimFor(a,'fire',ATTACK_HOME);
+   controls.fireDistance=controls.fireMoved?dragDistance(p,'fire',a):aimDistance(a,'fire');
  }else if(id===controls.superId){
-   controls.superAim=aimFor(match.actors[0],'super',p);controls.superDistance=dragDistance(p,'super',match.actors[0]);
+   controls.superMoved=controls.superMoved||Math.hypot(p.x-controls.superStart.x,p.y-controls.superStart.y)>16;
+   controls.superCancel=Math.hypot(p.x-CANCEL_ZONE.x,p.y-CANCEL_ZONE.y)<CANCEL_ZONE.r;
+   controls.superAim=controls.superMoved?aimFor(a,'super',p):aimFor(a,'super',SUPER_HOME);
+   controls.superDistance=controls.superMoved?dragDistance(p,'super',a):aimDistance(a,'super');
  }else if(id===controls.mouseAimId){
-   controls.fire=aimWorld(match.actors[0],{x:p.x,y:p.y-132+cameraY});controls.fireDistance=Math.min(heroes[match.actors[0].type].range,Math.hypot(p.x-match.actors[0].x,p.y-132+cameraY-match.actors[0].y));
+   const world={x:p.x,y:p.y-132+cameraY};
+   controls.fire=aimWorld(a,world);
+   controls.fireDistance=Math.min(heroes[a.type].range,Math.hypot(world.x-a.x,world.y-a.y));
  }
 }
+cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{
  e.preventDefault();cv.setPointerCapture(e.pointerId);
- let p=pointerPos(e);
+ const p=pointerPos(e);
  if(screen!=='battle'){
-   for(let i=buttonRects.length-1;i>=0;i--){let b=buttonRects[i];if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){b.action();break}}
+   for(let i=buttonRects.length-1;i>=0;i--){const b=buttonRects[i];if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){b.action();break}}
    return;
  }
- if(p.x<59&&p.y<89){screen='menu';resetPointers();return}
+ if(p.x<59&&p.y<89){screen='menu';resetPointers();return;}
  const player=match.actors[0];if(!player.alive||match.phase!=='play')return;
- if(Math.hypot(p.x-965,p.y-588)<59&&controls.superId===null){
-   controls.superId=e.pointerId;controls.superAim=aimFor(player,'super',p);
- }else if(Math.hypot(p.x-1127,p.y-546)<96&&controls.fireId===null){
-   controls.fireId=e.pointerId;controls.fire=aimFor(player,'fire',p);
- }else if(p.x<420&&controls.moveId===null){
-   controls.moveId=e.pointerId;controlUpdate(e.pointerId,p);
- }else if(e.pointerType==='mouse'&&p.y<510&&controls.mouseAimId===null){
-   controls.mouseAimId=e.pointerId;controls.fire=aimWorld(player,p);
+ if((e.pointerType==='mouse'&&e.button===2)||Math.hypot(p.x-SUPER_HOME.x,p.y-SUPER_HOME.y)<59){
+   if(controls.superId!==null)return;
+   controls.superId=e.pointerId;controls.superStart=p;controls.superMoved=false;controls.superCancel=false;
+   controls.superAim=aimFor(player,'super',SUPER_HOME);controls.superDistance=aimDistance(player,'super');
+ }else if(Math.hypot(p.x-ATTACK_HOME.x,p.y-ATTACK_HOME.y)<96){
+   if(controls.fireId!==null)return;
+   controls.fireId=e.pointerId;controls.fireStart=p;controls.fireMoved=false;controls.fireCancel=false;
+   controls.fire=aimFor(player,'fire',ATTACK_HOME);controls.fireDistance=aimDistance(player,'fire');
+ }else if(p.x<420&&p.y>200){
+   if(controls.moveId!==null)return;
+   controls.moveId=e.pointerId;
+   const nearHome=Math.hypot(p.x-MOVE_HOME.x,p.y-MOVE_HOME.y)<92;
+   controls.moveCenter=nearHome?{...MOVE_HOME}:{x:cap(p.x,95,320),y:cap(p.y,350,602)};
+   controlUpdate(e.pointerId,p);
+ }else if(e.pointerType==='mouse'&&e.button===0&&p.x>=275&&p.x<=1005&&p.y>=132&&p.y<=624){
+   if(controls.mouseAimId!==null)return;
+   controls.mouseAimId=e.pointerId;controlUpdate(e.pointerId,p);
  }
 });
 cv.addEventListener('pointermove',e=>{
@@ -918,21 +1015,24 @@ cv.addEventListener('pointermove',e=>{
  let h=-1;buttonRects.forEach((b,i)=>{if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h)h=i});hover=h;
 });
 function pointerUp(e){
- // Canceled gestures or pointer loss must not fire.
  const release=e.type==='pointerup',p=pointerPos(e);
  if(screen==='battle'&&match&&match.phase==='play'){
    const player=match.actors[0];
    if(player.alive&&release){
-     if(e.pointerId===controls.fireId||e.pointerId===controls.mouseAimId){
+     if(e.pointerId===controls.fireId){
+       controlUpdate(e.pointerId,p);
+       if(!controls.fireCancel){player.aim={...controls.fire};shoot(player,player.aim,false,controls.fireMoved?controls.fireDistance:null);}
+     }else if(e.pointerId===controls.mouseAimId){
        controlUpdate(e.pointerId,p);player.aim={...controls.fire};shoot(player,player.aim,false,controls.fireDistance);
      }else if(e.pointerId===controls.superId){
-       controlUpdate(e.pointerId,p);player.aim={...controls.superAim};player.chosenSuperDistance=controls.superDistance;superPower(player);player.chosenSuperDistance=null;
+       controlUpdate(e.pointerId,p);
+       if(!controls.superCancel){player.aim={...controls.superAim};player.chosenSuperDistance=controls.superMoved?controls.superDistance:null;superPower(player);player.chosenSuperDistance=null;}
      }
    }
  }
- if(e.pointerId===controls.moveId){controls.moveId=null;controls.move={x:0,y:0};controls.fireDistance=null;controls.superDistance=null}
- if(e.pointerId===controls.fireId){controls.fireId=null;controls.fireDistance=null;}
- if(e.pointerId===controls.superId){controls.superId=null;controls.superDistance=null;}
+ if(e.pointerId===controls.moveId){controls.moveId=null;controls.move={x:0,y:0};controls.moveCenter={...MOVE_HOME};}
+ if(e.pointerId===controls.fireId){controls.fireId=null;controls.fireDistance=null;controls.fireStart=null;controls.fireCancel=false;controls.fireMoved=false;}
+ if(e.pointerId===controls.superId){controls.superId=null;controls.superDistance=null;controls.superStart=null;controls.superCancel=false;controls.superMoved=false;}
  if(e.pointerId===controls.mouseAimId){controls.mouseAimId=null;controls.fireDistance=null;}
 }
 cv.addEventListener('pointerup',pointerUp);cv.addEventListener('pointercancel',pointerUp);
@@ -945,15 +1045,15 @@ window.addEventListener('keydown',e=>{
  if(e.repeat||screen!=='battle'||!match||match.phase!=='play')return;
  const a=match.actors[0];if(!a.alive)return;
  if(k===' '||k==='k'){
-   const target=closestEnemy(a);if(target)a.aim=norm(target.x-a.x,target.y-a.y);
+   const target=findAutoTarget(a,'super');if(target)a.aim=predictiveAim(a,target);
    superPower(a);
  }else if(k==='j'){
-   const target=closestEnemy(a);if(target)a.aim=norm(target.x-a.x,target.y-a.y);
+   const target=findAutoTarget(a,'fire');if(target)a.aim=predictiveAim(a,target);
    shoot(a,a.aim);
  }
 });
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();resetPointers()});
-function frame(t){let dt=last?Math.min(.042,(t-last)/1000):.016;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let renderDt=.016;function frame(t){let dt=last?Math.min(.042,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
-</script></body></html>
+</script><script src="gadgets.js?v=2"></script></body></html>
