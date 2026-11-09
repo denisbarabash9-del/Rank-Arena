@@ -363,7 +363,7 @@ function closestEnemy(a){let best=null,d=1e9;for(let b of match.actors){if(b.ali
 function burst(x,y,color,n=10){for(let i=0;i<n;i++)particles.push({x,y,vx:rnd(-145,145),vy:rnd(-145,145),life:rnd(.24,.65),total:.65,r:rnd(2,6),color})}
 function addBullet(a,dir,damageScale=1,extra={}){
  const h=heroes[a.type],lob=extra.lob??(a.type===8||a.type===9);
- const speed=extra.speed??h.proj*.78,range=Math.max(40,Math.min(extra.maxRange??h.range,extra.distance??h.range));
+ const speed=extra.speed??h.proj*.58,range=Math.max(40,Math.min(extra.maxRange??h.range,extra.distance??h.range));
  const bullet={type:a.type,age:0,spin:rnd(0,6.28),x:a.x+dir.x*25,y:a.y+dir.y*25,
   vx:dir.x*speed,vy:dir.y*speed,dmg:h.dmg*damageScale*(a.bot?.77:1)*(a.power>0?1.22:1),owner:a.id,side:a.side,
   life:Math.max(.1,range/speed),startX:a.x,startY:a.y,color:h.color,rad:extra.rad??7,pierce:0,hitIds:[],splash:0,slow:0,chain:false,burn:0,
@@ -842,7 +842,7 @@ drawAimPreview(m.actors[0]);for(let mine of m.mines){c.beginPath();c.arc(mine.x,
  iconFighter(a.x,a.y+bounce,22,a.type,a.side,a.invis>0?.52:1);
  if(a.hitFlash>0){c.beginPath();c.arc(a.x,a.y,28,0,TAU);c.strokeStyle='#ffffff'+Math.round(180*a.hitFlash/.18).toString(16).padStart(2,'0');c.lineWidth=4;c.stroke()}
  if(a.attackFlash>0){ellipse(a.x+a.aim.x*34,a.y+a.aim.y*34,6+7*a.attackFlash/.16,6+7*a.attackFlash/.16,'#ffe8a2b0')}
-c.strokeStyle='#fff9';c.lineWidth=3;c.beginPath();c.moveTo(a.x+a.aim.x*17,a.y+a.aim.y*17);c.lineTo(a.x+a.aim.x*32,a.y+a.aim.y*32);c.stroke();rr(a.x-28,a.y-43,56,8,4,'#1a1f35');rr(a.x-28,a.y-43,Math.max(0,56*a.hp/a.max),8,4,a.side===0?'#52eabe':'#ff6c83');text(a.bot?(a.side===0?'СОЮЗНИК':'ВРАГ'):'ТЫ',a.x,a.y-55,11,'#fff','center',900,true);text(h.name,a.x,a.y+39,10,h.color,'center',900,true);if(a.gems>0){star(a.x+30,a.y-32,10,'#f6b0ff',6);text(a.gems,a.x+43,a.y-34,13,'#fff','center',950,true)}}for(let p of particles){c.save();c.globalAlpha=Math.max(0,p.life/p.total);ellipse(p.x,p.y,p.r,p.r,p.color);c.restore()}
+c.strokeStyle='#fff9';c.lineWidth=3;c.beginPath();c.moveTo(a.x+a.aim.x*17,a.y+a.aim.y*17);c.lineTo(a.x+a.aim.x*32,a.y+a.aim.y*32);c.stroke();const ammoW=a.ammoMax*12-4,ammoX=a.x-ammoW/2,ammoY=a.y-68;for(let i=0;i<a.ammoMax;i++){rr(ammoX+i*12,ammoY,8,8,3,'#1a1f35cc','#ffffff24');if(i<a.ammo)rr(ammoX+i*12+1,ammoY+1,6,6,2,'#dff6ff')}rr(a.x-28,a.y-43,56,8,4,'#1a1f35');rr(a.x-28,a.y-43,Math.max(0,56*a.hp/a.max),8,4,a.side===0?'#52eabe':'#ff6c83');text(a.bot?(a.side===0?'СОЮЗНИК':'ВРАГ'):'ТЫ',a.x,a.y-55,11,'#fff','center',900,true);text(h.name,a.x,a.y+39,10,h.color,'center',900,true);if(a.gems>0){star(a.x+30,a.y-32,10,'#f6b0ff',6);text(a.gems,a.x+43,a.y-34,13,'#fff','center',950,true)}}for(let p of particles){c.save();c.globalAlpha=Math.max(0,p.life/p.total);ellipse(p.x,p.y,p.r,p.r,p.color);c.restore()}
 c.restore();
 rr(40,20,500,96,15,'#12152bdd','#52638b55');rr(736,20,505,96,15,'#12152bdd','#52638b55');text('СИНИЕ',81,48,18,'#9cdeff');text('КРАСНЫЕ',1200,48,18,'#ffaebf','right');if(m.mode===0){text(m.wins[0]+'  :  '+m.wins[1],640,64,50,'white','center',1000,true);text('РАУНД '+m.round+(m.bestOf===3?' · СЕРИЯ '+m.seriesWins[0]+':'+m.seriesWins[1]:''),638,105,14,'#c7d4e8','center')}
  else{text(m.score[0]+'   :   '+m.score[1],640,64,50,'white','center',1000,true);text(m.mode===1?(m.gemLeader<0?'СОБЕРИ 10 КРИСТАЛЛОВ':'ПОБЕДА ЧЕРЕЗ '+Math.ceil(m.gemCountdown)+' СЕК'):m.mode===2?'ПЕРВЫЙ ДО 100%':m.mode===3?'ПЕРВЫЙ ДО 20 ЗВЁЗД':m.mode===4?'УНИЧТОЖЬ ЧУЖОЙ СЕЙФ':'ПЕРВЫЙ ДО 120 ОЧКОВ',639,105,14,'#c7d4e8','center')}
