@@ -82,10 +82,11 @@ function beginDraft(practice=false){
  modeIndex=pickFromBag('retro25_modes',MODE_DATA.length);mapIndex=pickFromBag('retro25_maps',MAPS.length);modifierIndex=0;
  applyMap(mapIndex);match=null;
  const tier=practice?7:rankIdx(),bans=tier>=3,turns=true;
- draft={picks:[-1,-1,-1,-1,-1,-1],bans:[],banStep:0,phase:bans?'ban':'pick',step:turns?0:5,
+ const order=[0,1,2,3,4,5];for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+ draft={order,playerTurn:order.indexOf(0),picks:[-1,-1,-1,-1,-1,-1],bans:[],banStep:0,phase:bans?'ban':'pick',step:turns?0:5,
   elapsed:0,selected:-1,mode:modeIndex,map:mapIndex,modifier:0,
   tier,bestOf:tier>=4?3:1,turns,practice,page:rosterPage};
- if(!bans&&!turns)draft.selected=0;
+ if(!bans&&draft.playerTurn===0)draft.selected=draftAvailable()[0]??-1;
  particles=[];screen='draft';resetPointers();
 }
 function tacticScore(heroId,foes,mates){
@@ -111,28 +112,33 @@ function draftBotBan(){
  if(draft.banStep===2){draft.selected=draftAvailable()[0]??-1;}
 }
 function draftBotPick(){
- if(!draft||draft.phase!=='pick'||draft.step>=5)return;
- const slot=draftOrder[draft.step],enemy=slot>=3;
+ if(!draft||draft.phase!=='pick'||draft.step>=6||draft.step===draft.playerTurn)return;
+ const slot=draft.order[draft.step],enemy=slot>=3;
  const foes=draft.picks.filter((x,i)=>x!==-1&&(enemy?i<3:i>=3));
  const mates=draft.picks.filter((x,i)=>x!==-1&&(enemy?i>=3:i<3));
  const options=draftAvailable().map(h=>({h,score:tacticScore(h,foes,mates)+rnd(-1,1.7)})).sort((a,b)=>b.score-a.score);
  const top=options.slice(0,Math.min(3,options.length)),choice=top[Math.random()<.75?0:Math.floor(Math.random()*top.length)];
  if(!choice)return;
  draft.picks[slot]=choice.h;draft.step++;draft.elapsed=0;
- if(draft.step===5){
+ if(draft.step===draft.playerTurn){
   draft.selected=draftAvailable().sort((a,b)=>tacticScore(b,draft.picks.slice(3),draft.picks.slice(1,3))-tacticScore(a,draft.picks.slice(3),draft.picks.slice(1,3)))[0];
-  draft.page=Math.floor(draft.selected/12);
+  if(draft.selected!==undefined)draft.page=Math.floor(draft.selected/12);
  }
+ if(draft.step>=6)startMatch();
 }
 function confirmDraft(){
  if(!draft||!draftAvailable().includes(draft.selected))return;
  if(draft.phase==='ban'){
   draft.bans.push(draft.selected);draft.banStep=3;draft.phase='pick';draft.step=draft.turns?0:5;draft.elapsed=0;
   draft.selected=draft.turns?-1:(draftAvailable()[0]??-1);
+  if(draft.step===draft.playerTurn)draft.selected=draftAvailable()[0]??-1;
   return;
  }
- if(draft.phase!=='pick'||draft.step!==5)return;
+ if(draft.phase!=='pick'||draft.step!==draft.playerTurn)return;
  draft.picks[0]=draft.selected;heroIndex=draft.selected;
+ draft.step++;draft.elapsed=0;draft.selected=-1;
+ if(draft.step>=6){startMatch();return;}
+ return;
  if(!draft.turns){
   // In lower leagues players select simultaneously; bot picks are completed when the human locks in.
   for(let i=0;i<5;i++){
@@ -145,7 +151,7 @@ function confirmDraft(){
  }
  startMatch();
 }
-function chooseDraft(i){if(draft&&(draft.phase==='ban'&&draft.banStep===2||draft.phase==='pick'&&draft.step===5)&&draftAvailable().includes(i))draft.selected=i}
+function chooseDraft(i){if(draft&&(draft.phase==='ban'&&draft.banStep===2||draft.phase==='pick'&&draft.step===draft.playerTurn)&&draftAvailable().includes(i))draft.selected=i}
 
 const rankNames=['БРОНЗА','СЕРЕБРО','ЗОЛОТО','АЛМАЗ','МИФИЧЕСКИЙ','ЛЕГЕНДА','МАСТЕР','ПРО'];
 const rankThresholds=[0,750,1500,3000,4500,6000,8500,11250];
@@ -745,7 +751,7 @@ function finish(winner){
  screen='result';resetPointers();
 }
 
-function advance(dt){tick+=dt;if(screen==='draft'&&draft){if(draft.phase==='ban'&&draft.banStep<2){draft.elapsed+=dt;if(draft.elapsed>=.72)draftBotBan()}else if(draft.phase==='pick'&&draft.turns&&draft.step<5){draft.elapsed+=dt;if(draft.elapsed>=.85)draftBotPick()}}if(screen==='battle'&&match){if(match.phase==='series'){match.countdown-=dt;if(match.countdown<=0)resetSeriesGame()}else if(match.phase==='round'){match.countdown-=dt;if(match.countdown<=0){const savedSup=match.actors.map(a=>a.sup);match.round++;match.time=120;spawnAll();match.actors.forEach((a,i)=>{a.sup=savedSup[i]??0});match.phase='play'}}else updateBattle(dt)}}
+function advance(dt){tick+=dt;if(screen==='draft'&&draft){if(draft.phase==='ban'&&draft.banStep<2){draft.elapsed+=dt;if(draft.elapsed>=.72)draftBotBan()}else if(draft.phase==='pick'&&draft.turns&&draft.step<6&&draft.step!==draft.playerTurn){draft.elapsed+=dt;if(draft.elapsed>=.85)draftBotPick()}}if(screen==='battle'&&match){if(match.phase==='series'){match.countdown-=dt;if(match.countdown<=0)resetSeriesGame()}else if(match.phase==='round'){match.countdown-=dt;if(match.countdown<=0){const savedSup=match.actors.map(a=>a.sup);match.round++;match.time=120;spawnAll();match.actors.forEach((a,i)=>{a.sup=savedSup[i]??0});match.phase='play'}}else updateBattle(dt)}}
 function arena(){
  const a={x:FIELD.left,y:FIELD.top,w:FIELD.right-FIELD.left,h:FIELD.bottom-FIELD.top};
  rr(a.x-12,a.y-12,a.w+24,a.h+24,16,'#151c31');
