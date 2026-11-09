@@ -108,6 +108,7 @@
     a.gadgetUses--;
     a.gadgetCooldown=GADGETS[a.type].cd;
     a.gadgetFlash=.35;
+    if(typeof window.RANK_AUDIO?.play==='function')window.RANK_AUDIO.play('gadget',{owner:a.id===0?'p':'bot',quiet:a.id!==0});
     burst(a.x,a.y,'#65ffab',14);
     return true;
   }
