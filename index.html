@@ -132,7 +132,7 @@ function draftBotPick(){
  draft.picks[slot]=choice.h;draft.step++;draft.elapsed=0;
  if(draft.step===draft.playerTurn){
   draft.selected=draftAvailable().sort((a,b)=>tacticScore(b,draft.picks.slice(3),draft.picks.slice(1,3))-tacticScore(a,draft.picks.slice(3),draft.picks.slice(1,3)))[0];
-  if(draft.selected!==undefined)draft.page=Math.floor(draft.selected/12);
+  if(draft.selected!==undefined)draft.page=Math.floor(draft.selected/24);
  }
  if(draft.step>=6)startMatch();
 }
@@ -237,10 +237,10 @@ function rankMedal(x,y,r,idx){c.save();ellipse(x,y,r+10,r+10,'#151436');c.beginP
 
 function menuDraw(){
  backdrop();
- header('BRAWL RETRO · РАНГОВЫЙ 2025','Фан-версия Ranked 2.0 · 24 бойца · оригинальные иконки');
+ header('RANK ARENA · РАНГОВЫЙ','Фан-версия Ranked · новые бойцы · оригинальные иконки');
  rr(48,174,777,474,22,'#141a48e8','#5c89d9',3);
  rr(62,191,749,68,15,'#1464b7','#54ddff',2);
- text('РЕТРО 2025',86,219,22,'#ffe27a');text('24 БОЙЦА',350,221,19,'#fff');
+ text('РЕТРО 2025',86,219,22,'#ffe27a');text(heroes.length+' БОЙЦОВ',350,221,19,'#fff');
  text('УРОВЕНЬ СИЛЫ 11',786,221,14,'#c9fcff','right');
  heroes.slice(rosterPage*12,rosterPage*12+12).forEach((h,j)=>{
   const i=rosterPage*12+j,x=67+(j%4)*186,y=267+Math.floor(j/4)*84;
@@ -250,7 +250,7 @@ function menuDraw(){
   text(h.cls,x+64,y+46,11,classColors[h.cls],'left',850);
   text('СИЛА 11',x+92,y+65,10,'#f2d983','center',700);
  });
- text('6 РЕЖИМОВ · 8 КАРТ · 3×3 · 24 БОЙЦА',86,625,15,'#bdcefc');
+ text('6 РЕЖИМОВ · '+MAPS.length+' КАРТ · 3×3 · '+heroes.length+' БОЙЦОВ',86,625,15,'#bdcefc');
  button(575,213,104,39,'◀  '+(rosterPage+1)+'/2',()=>{rosterPage=1-rosterPage},'#a8d5ff',14);
  button(690,213,104,39,'ДАЛЕЕ ▶',()=>{rosterPage=1-rosterPage},'#f6d97d',14);
  rr(843,177,384,291,24,'#1e2761','#6476c3',3);
@@ -651,7 +651,7 @@ function updateBattle(dt){
     if(target){
       const n=norm(target.x-a.x,target.y-a.y);a.aim=n;
       if(a.botThought<=0){
-        const isLob=[8,9].includes(a.type),canShoot=isLob||lineClear(a,target);
+        const isLob=[8,9].includes(a.type)||heroes[a.type].shotKind==='lob',canShoot=isLob||lineClear(a,target);
         if(d<range*.9&&canShoot&&Math.random()<(matchup>0?.88:.75)){const angle=Math.atan2(n.y,n.x)+rnd(matchup>0?-.12:-.20,matchup>0?.12:.20);shoot(a,{x:Math.cos(angle),y:Math.sin(angle)})}
         if(a.sup>=100&&Math.random()<.40&&([1,4,5,6,12,17,19,20,21].includes(a.type)||d<250))superPower(a);
       }
@@ -902,7 +902,7 @@ let keys=new Set(),mouse={x:0,y:0};
 function pointerPos(e){let r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
 function findAutoTarget(a,kind){
  if(!match)return null;
- const lob=[8,9].includes(a.type),range=aimDistance(a,kind);
+ const lob=[8,9].includes(a.type)||heroes[a.type].shotKind==='lob',range=aimDistance(a,kind);
  const choices=match.actors.filter(b=>b.alive&&b.side!==a.side&&teamCanSee(b,a.side)
     &&dist(a,b)<=range+24&&(lob||lineClear(a,b)||kind==='super'));
  choices.sort((u,v)=>dist(a,u)-dist(a,v));return choices[0]||null;
@@ -923,7 +923,7 @@ function aimFor(a,kind,point){
 function aimWorld(a,point){return norm(point.x-a.x,point.y-a.y)}
 function aimDistance(a,kind){
  if(kind==='fire')return heroes[a.type].range;
- return [350,590,360,370,125,110,360,240,295,300,385,290,85,220,250,440,195,100,285,385,175,75,260,198][a.type];
+ return [350,590,360,370,125,110,360,240,295,300,385,290,85,220,250,440,195,100,285,385,175,75,260,198][a.type]??heroes[a.type].range;
 }
 function dragDistance(point,kind,a){
  const base=kind==='super'?SUPER_HOME:ATTACK_HOME,d=Math.hypot(point.x-base.x,point.y-base.y),max=aimDistance(a,kind);
@@ -1059,6 +1059,6 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();resetPointers()});
-let renderDt=.016;function frame(t){let dt=last?Math.min(.033,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='ranks')rankGalleryDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let renderDt=.016;function frame(t){let dt=last?Math.min(.033,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='ranks')rankGalleryDraw();else if(screen==='roster')rosterDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
-</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=2"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=2"></script><script src="smooth-motion.js?v=2"></script><script src="rank-icons.js?v=1"></script></body></html>
+</script><script src="fighters-data.js?v=1"></script><script src="fighters-engine.js?v=1"></script><script src="gadgets.js?v=3"></script><script src="ranked-ui.js?v=3"></script><script src="lobby-ui.js?v=2"></script><script src="visual-25d.js?v=2"></script><script src="smooth-motion.js?v=2"></script><script src="rank-icons.js?v=1"></script></body></html>
