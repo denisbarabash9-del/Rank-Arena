@@ -151,3 +151,180 @@
   });
   window.RETRO_GADGETS={items:GADGETS,use:useGadget};
 })();
+
+
+/* Visual style pass: make graphics feel closer to Brawl Stars (not an exact copy). */
+(() => {
+  if (typeof rr === 'undefined' || typeof heroes === 'undefined') return;
+
+  // Brighter class colors and map palettes.
+  if (typeof colors !== 'undefined') {
+    colors.bg = '#102552';
+    colors.card = '#173772';
+    colors.light = '#3f63b5';
+    colors.yellow = '#ffd247';
+    colors.blue = '#48c2ff';
+    colors.red = '#ff5f78';
+    colors.mint = '#56f1b8';
+  }
+  if (typeof classColors !== 'undefined') {
+    classColors['ТАНК'] = '#ffb14d';
+    classColors['МЕТАТЕЛЬ'] = '#ff87b0';
+    classColors['ПОДДЕРЖКА'] = '#5df0b9';
+    classColors['СТРЕЛОК'] = '#ff8dea';
+    classColors['УБИЙЦА'] = '#a88cff';
+    classColors['КОНТРОЛЬ'] = '#6fdcff';
+    classColors['УРОН'] = '#ff9d66';
+  }
+  if (typeof MAPS !== 'undefined') {
+    const nicerThemes = [
+      ['#5ec2b2','#72d8c8','#e6be6b'],
+      ['#5dbd74','#78d98f','#d3b16b'],
+      ['#77b0d5','#5d93bc','#deb06a'],
+      ['#8db7ff','#7297ed','#d8ca7a'],
+      ['#58cc8e','#79e0a4','#dbc37f'],
+      ['#64d0d0','#85e3e3','#e9c979'],
+      ['#76c5df','#95ddf4','#d7bc7b'],
+      ['#7bc182','#95da9b','#e4c773']
+    ];
+    MAPS.forEach((m,i)=>{
+      m.theme = nicerThemes[i % nicerThemes.length];
+    });
+  }
+
+  const oldButton = button;
+  button = function(x,y,w,h,label,action,col='#ffd247',fz=23,sub=''){
+    buttonRects.push({x,y,w,h,action});
+    let over = hover===buttonRects.length-1;
+    rr(x,y+8,w,h,15,'#00000055');
+    rr(x,y+3,w,h,15,'#7a4e11');
+    rr(x,y,w,h,15,over ? '#fff2a7' : col,'#fff4cf',4);
+    rr(x+5,y+5,w-10,h*0.42,11,'#ffffff2c');
+    text(label,x+w/2,y+h/2-(sub?9:0),fz,'#2b2148','center',1000,true);
+    if(sub)text(sub,x+w/2,y+h/2+17,12,'#533a1b','center',800);
+  };
+
+  header = function(title,sub){
+    text('★  RANK ARENA',74,49,24,'#ffe067','left',1000,true);
+    text(title,80,109,45,'#ffffff','left',1000,true);
+    if(sub)text(sub,82,152,19,'#d6ecff','left',700,true);
+  };
+
+  backdrop = function(){
+    c.fillStyle = gradient(0,0,W,H,['#2d7fe7','#16306d']);
+    c.fillRect(0,0,W,H);
+    c.save();
+    c.globalAlpha=.18;
+    for(let i=0;i<16;i++){
+      const x=(i*97)%W, y=(i*61)%H;
+      c.beginPath(); c.arc(x,y,70+(i%4)*20,0,TAU); c.fillStyle='#ffffff'; c.fill();
+    }
+    c.globalAlpha=.10;
+    for(let x=-60;x<W+80;x+=120){
+      for(let y=-40;y<H+80;y+=120){
+        star(x + (y%240)*0.18, y, 10, '#d8ebff', 4);
+      }
+    }
+    c.restore();
+    c.fillStyle='#0b174f55'; c.beginPath(); c.ellipse(1120,120,220,120,0,0,TAU); c.fill();
+    c.fillStyle='#ffffff22'; c.beginPath(); c.ellipse(1035,88,120,42,0,0,TAU); c.fill();
+    c.beginPath(); c.ellipse(1160,80,84,34,0,0,TAU); c.fill();
+  };
+
+  const oldRankMedal = rankMedal;
+  rankMedal = function(x,y,r,idx){
+    c.save();
+    ellipse(x,y+5,r+11,r+11,'#0000003d');
+    c.beginPath(); c.arc(x,y,r+7,0,TAU); c.fillStyle='#233876'; c.fill();
+    c.beginPath(); c.arc(x,y,r,0,TAU); c.fillStyle=['#c78142','#d9dfeb','#f0c847','#54baff','#c07dff','#ff6ea3','#6ef6d1','#ffe06c'][idx]; c.fill();
+    c.lineWidth=5; c.strokeStyle='#fff7'; c.stroke();
+    c.beginPath(); c.arc(x,y-r*0.12,r*0.72,0,Math.PI); c.strokeStyle='#fff5'; c.lineWidth=3; c.stroke();
+    star(x,y,r*.62,'#fff8',5);
+    text(['B','S','G','D','M','L','★','P'][idx],x,y+2,r*.66,'#2e2340','center',1000,true);
+    c.restore();
+  };
+
+  // Make portraits punchier with a stronger outline and a team ring.
+  const oldIconFighter = iconFighter;
+  iconFighter = function(x,y,r,type,team,alpha=1){
+    c.save();
+    c.globalAlpha = alpha;
+    ellipse(x,y+r*.9,r*1.02,r*.30,'#0005');
+    c.beginPath(); c.arc(x,y,r+6,0,TAU); c.fillStyle = team===0 ? '#2ea7ff' : '#ff5b70'; c.fill();
+    c.beginPath(); c.arc(x,y,r+2.5,0,TAU); c.fillStyle = '#15214a'; c.fill();
+    c.restore();
+    oldIconFighter(x,y,r,type,team,alpha);
+    c.save();
+    c.globalAlpha = alpha;
+    c.beginPath(); c.arc(x,y,r+1,0,TAU); c.strokeStyle='#fff8'; c.lineWidth=2.2; c.stroke();
+    c.beginPath(); c.arc(x-r*.25,y-r*.24,r*.14,0,TAU); c.fillStyle='#ffffff20'; c.fill();
+    c.restore();
+  };
+
+  arena = function(){
+    const a={x:FIELD.left,y:FIELD.top,w:FIELD.right-FIELD.left,h:FIELD.bottom-FIELD.top};
+    rr(a.x-14,a.y-14,a.w+28,a.h+28,20,'#0d2450','#7fd7ff',5);
+    rr(a.x,a.y,a.w,a.h,14,'#7ed0c1','#daf4f2',3);
+    c.save(); c.beginPath(); c.rect(a.x,a.y,a.w,a.h); c.clip();
+
+    // Ground tiles: softer and more like a bright Brawl arena.
+    for(let x=a.x;x<a.x+a.w;x+=44){
+      for(let y=a.y;y<a.y+a.h;y+=44){
+        const alt=((x+y)/44|0)%2;
+        c.fillStyle = alt ? '#85d7c9' : '#75cbbd';
+        c.fillRect(x,y,44,44);
+        c.fillStyle = '#ffffff12';
+        c.fillRect(x+5,y+5,14,6);
+      }
+    }
+
+    // Spawn zones.
+    rr(356,34,568,164,18,'#4db2ff2e','#d6f3ff77',3);
+    rr(356,1119,568,164,18,'#ff76882e','#ffe0e677',3);
+    c.setLineDash([16,12]); c.strokeStyle='#ffffff55'; c.lineWidth=4;
+    c.beginPath(); c.moveTo(340,660); c.lineTo(940,660); c.stroke(); c.setLineDash([]);
+
+    // Bushes.
+    for(let b of bushes){
+      rr(b.x,b.y,b.w,b.h,12,'#3fb15c','#20693f',4);
+      for(let i=0;i<10;i++){
+        const px=b.x+12+(i*31)%(Math.max(18,b.w-22));
+        const py=b.y+12+(i*19)%(Math.max(18,b.h-22));
+        ellipse(px,py,10,7,'#7cf184aa');
+        ellipse(px+3,py-2,8,5,'#4ec95faa');
+      }
+    }
+
+    // Walls.
+    for(let w of walls){
+      rr(w.x+4,w.y+8,w.w,w.h,10,'#00000033');
+      rr(w.x,w.y,w.w,w.h,10,'#4c77c6','#d2e8ff',4);
+      rr(w.x+4,w.y+4,w.w-8,Math.max(12,w.h*0.34),8,'#7fb9ff55');
+      for(let xx=w.x+8;xx<w.x+w.w-8;xx+=28){
+        for(let yy=w.y+8;yy<w.y+w.h-8;yy+=28){
+          rr(xx,yy,20,20,4,((xx+yy)/28|0)%2?'#5f8ce2':'#567fd1');
+        }
+      }
+    }
+
+    c.restore();
+  };
+
+  // Extra combat cosmetics: ammo pips, stronger panels and cleaner labels.
+  const oldDrawCombat = drawCombat;
+  drawCombat = function(){
+    oldDrawCombat();
+    if(screen!=='battle' || !match || !match.actors || !match.actors[0]) return;
+    const p = match.actors[0];
+    const h = heroes[p.type];
+    rr(522,660,236,44,13,'#132b57dd','#88dcff66',2);
+    text(h.name+' · '+h.cls,540,682,15,'#ffffff','left',1000,true);
+    for(let i=0;i<p.ammoMax;i++){
+      const filled = i < p.ammo;
+      rr(542+i*24,694,16,8,4,filled?'#ffd657':'#ffffff22',filled?'#fff2aa':'#ffffff33',1.5);
+    }
+    if(typeof RETRO_GADGETS!=='undefined' && RETRO_GADGETS.items && RETRO_GADGETS.items[p.type]){
+      text('ГАДЖЕТ: '+RETRO_GADGETS.items[p.type].name,780,682,13,'#98ffba','left',900,true);
+    }
+  };
+})();
