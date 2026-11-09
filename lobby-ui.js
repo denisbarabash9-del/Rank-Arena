@@ -36,7 +36,7 @@
    rr(23,131,230,462,18,'#112b62dd','#74acff',3);
    text('МЕНЮ',136,160,21,'#ffe17a','center',1000,true);
    button(39,191,197,66,'БОЙЦЫ',()=>{heroIndex=(heroIndex+1)%heroes.length},'#8ad5ff',20);
-   button(39,273,197,66,'РАНГИ',()=>{screen='pass'},'#d4baff',20);
+   button(39,273,197,66,'РАНГИ',()=>{screen='ranks'},'#d4baff',20);
    button(39,356,197,66,'ПРО-ДРАФТ',()=>beginDraft(true),'#a7efc1',18);
    rr(38,447,199,128,14,'#15295b','#67a4f1',2);
    text('ПОБЕДЫ',59,470,15,'#bfe7ff','left',800);
