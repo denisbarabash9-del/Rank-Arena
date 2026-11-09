@@ -1056,4 +1056,4 @@ window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();resetPointers()});
 let renderDt=.016;function frame(t){let dt=last?Math.min(.042,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
-</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=1"></script><script src="lobby-ui.js?v=1"></script></body></html>
+</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=1"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=1"></script></body></html>
