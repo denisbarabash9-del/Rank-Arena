@@ -5,7 +5,7 @@
  const oldDraftDraw=draftDraw;
  draftDraw=function(){
   if(!draft){oldDraftDraw();return}
-  const ban=draft.phase==='ban',myTurn=ban?draft.banStep===2:draft.step===5;
+  const ban=draft.phase==='ban',myTurn=ban?draft.banStep===2:draft.step===draft.playerTurn;
   const available=draftAvailable();
   // Dark maroon and blue panels, bright card portraits, two-team draft.
   c.fillStyle='#170d19';c.fillRect(0,0,W,H);
