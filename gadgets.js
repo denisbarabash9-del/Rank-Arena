@@ -1,7 +1,7 @@
 /* Retro Ranked 2025: 24 unique character gadgets. Loaded after the main game script. */
 'use strict';
 (() => {
-  if (typeof heroes === 'undefined' || heroes.length !== 24 || typeof makeActor !== 'function') return;
+  if (typeof heroes === 'undefined' || heroes.length < 24 || typeof makeActor !== 'function') return;
   const GADGETS = [
     {name:'БЫСТРЫЙ ШАГ',desc:'Шелли совершает рывок вперёд',cd:5},
     {name:'ЗАПАСНЫЕ ПАТРОНЫ',desc:'Кольт мгновенно восполняет 2 патрона',cd:6},
@@ -28,6 +28,7 @@
     {name:'АКТИВНАЯ ЗАЩИТА',desc:'Фрэнк снимает оглушение и включает щит',cd:8},
     {name:'АВТОПРИЦЕЛ',desc:'Пайпер делает выстрел с отбрасыванием',cd:7}
   ];
+  GADGETS.push(...heroes.slice(24).map(h=>({name:h.gadgetName,desc:h.desc,cd:6.5})));
   const BTN={x:1034,y:425,r:43};
   const originalMakeActor=makeActor;
   makeActor=function(...args){
@@ -89,7 +90,20 @@
       case 21: a.hp=Math.min(a.max,a.hp+(inBush(a)?1700:790));a.shield=Math.max(a.shield,1.5);break;
       case 22: a.stun=0;a.root=0;a.shield=Math.max(a.shield,3.3);break;
       case 23: {const target=nearby(a,365).filter(b=>lineClear(a,b)).sort((x,y)=>dist(a,x)-dist(a,y))[0];if(target){const dir=norm(target.x-a.x,target.y-a.y);const bullet=addBullet(a,dir,.70,{kind:'autoaim',rad:10,knockback:115,maxRange:380,distance:380,speed:775});bullet.color='#f8b9de';}else{a.haste=Math.max(a.haste,2);a.shield=Math.max(a.shield,1.1);}break;}
-      default:return false;
+      default:{
+        if(a.type<24)return false;
+        switch(h.gadgetKind){
+          case 'dash':dash(a,aim,155);a.shield=Math.max(a.shield,.8);break;
+          case 'heal':a.hp=Math.min(a.max,a.hp+1200);for(const b of match.actors)if(b.alive&&b.side===a.side&&dist(a,b)<145)b.hp=Math.min(b.max,b.hp+500);break;
+          case 'shield':a.shield=Math.max(a.shield,3.0);a.hp=Math.min(a.max,a.hp+350);break;
+          case 'pulse':pulse(a,a,145,420,.45,1.6,45);break;
+          case 'ammo':a.ammo=Math.min(a.ammoMax,a.ammo+2);a.ammoTick=0;a.cd=0;a.power=Math.max(a.power,1.8);break;
+          case 'cloud':placeHazard(a.x+aim.x*125,a.y+aim.y*125,103,a.side,a.id,'honey',4.0,65);break;
+          case 'speed':a.haste=Math.max(a.haste,3.3);a.power=Math.max(a.power,1.8);break;
+          default:a.shield=Math.max(a.shield,1.5);
+        }
+        break;
+      }
     }
     a.gadgetUses--;
     a.gadgetCooldown=GADGETS[a.type].cd;
