@@ -129,27 +129,14 @@ function draftBotPick(){
 function confirmDraft(){
  if(!draft||!draftAvailable().includes(draft.selected))return;
  if(draft.phase==='ban'){
-  draft.bans.push(draft.selected);draft.banStep=3;draft.phase='pick';draft.step=draft.turns?0:5;draft.elapsed=0;
-  draft.selected=draft.turns?-1:(draftAvailable()[0]??-1);
-  if(draft.step===draft.playerTurn)draft.selected=draftAvailable()[0]??-1;
+  draft.bans.push(draft.selected);draft.banStep=3;draft.phase='pick';draft.step=0;draft.elapsed=0;
+  draft.selected=draft.playerTurn===0?(draftAvailable()[0]??-1):-1;
   return;
  }
  if(draft.phase!=='pick'||draft.step!==draft.playerTurn)return;
  draft.picks[0]=draft.selected;heroIndex=draft.selected;
  draft.step++;draft.elapsed=0;draft.selected=-1;
- if(draft.step>=6){startMatch();return;}
- return;
- if(!draft.turns){
-  // In lower leagues players select simultaneously; bot picks are completed when the human locks in.
-  for(let i=0;i<5;i++){
-   const slot=draftOrder[i],enemy=slot>=3;
-   const foes=draft.picks.filter((x,j)=>x!==-1&&(enemy?j<3:j>=3));
-   const mates=draft.picks.filter((x,j)=>x!==-1&&(enemy?j>=3:j<3));
-   const choices=draftAvailable().sort((a,b)=>tacticScore(b,foes,mates)-tacticScore(a,foes,mates));
-   draft.picks[slot]=choices[0];
-  }
- }
- startMatch();
+ if(draft.step>=6)startMatch();
 }
 function chooseDraft(i){if(draft&&(draft.phase==='ban'&&draft.banStep===2||draft.phase==='pick'&&draft.step===draft.playerTurn)&&draftAvailable().includes(i))draft.selected=i}
 
@@ -1062,4 +1049,4 @@ window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();resetPointers()});
 let renderDt=.016;function frame(t){let dt=last?Math.min(.033,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='ranks')rankGalleryDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
-</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=1"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=1"></script><script src="smooth-motion.js?v=2"></script><script src="rank-icons.js?v=1"></script></body></html>
+</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=2"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=1"></script><script src="smooth-motion.js?v=2"></script><script src="rank-icons.js?v=1"></script></body></html>
