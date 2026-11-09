@@ -745,7 +745,7 @@ function finish(winner){
  screen='result';resetPointers();
 }
 
-function advance(dt){tick+=dt;if(screen==='draft'&&draft){if(draft.phase==='ban'&&draft.banStep<2){draft.elapsed+=dt;if(draft.elapsed>=.72)draftBotBan()}else if(draft.phase==='pick'&&draft.turns&&draft.step<5){draft.elapsed+=dt;if(draft.elapsed>=.85)draftBotPick()}}if(screen==='battle'&&match){if(match.phase==='series'){match.countdown-=dt;if(match.countdown<=0)resetSeriesGame()}else if(match.phase==='round'){match.countdown-=dt;if(match.countdown<=0){match.round++;match.time=120;spawnAll();match.phase='play'}}else updateBattle(dt)}}
+function advance(dt){tick+=dt;if(screen==='draft'&&draft){if(draft.phase==='ban'&&draft.banStep<2){draft.elapsed+=dt;if(draft.elapsed>=.72)draftBotBan()}else if(draft.phase==='pick'&&draft.turns&&draft.step<5){draft.elapsed+=dt;if(draft.elapsed>=.85)draftBotPick()}}if(screen==='battle'&&match){if(match.phase==='series'){match.countdown-=dt;if(match.countdown<=0)resetSeriesGame()}else if(match.phase==='round'){match.countdown-=dt;if(match.countdown<=0){const savedSup=match.actors.map(a=>a.sup);match.round++;match.time=120;spawnAll();match.actors.forEach((a,i)=>{a.sup=savedSup[i]??0});match.phase='play'}}else updateBattle(dt)}}
 function arena(){
  const a={x:FIELD.left,y:FIELD.top,w:FIELD.right-FIELD.left,h:FIELD.bottom-FIELD.top};
  rr(a.x-12,a.y-12,a.w+24,a.h+24,16,'#151c31');
