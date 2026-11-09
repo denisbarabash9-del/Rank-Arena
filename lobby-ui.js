@@ -30,12 +30,12 @@
    star(541,59,16,'#65f8df',6);
    text('XP '+proPassXP,614,59,20,'#fff','center',1000,true);
    rr(701,32,294,56,13,'#1a2e65','#6b9be0',2);
-   text('БОЙЦЫ  24 / 24',844,58,22,'#ecf8ff','center',1000,true);
+   text('БОЙЦЫ  '+heroes.length+' / '+heroes.length,844,58,22,'#ecf8ff','center',1000,true);
    button(1015,31,240,58,'PRO PASS',()=>{screen='pass'},'#a9f8ce',20);
    // Left-side menu cards.
    rr(23,131,230,462,18,'#112b62dd','#74acff',3);
    text('МЕНЮ',136,160,21,'#ffe17a','center',1000,true);
-   button(39,191,197,66,'БОЙЦЫ',()=>{heroIndex=(heroIndex+1)%heroes.length},'#8ad5ff',20);
+   button(39,191,197,66,'БОЙЦЫ',()=>{rosterPage=Math.floor(heroIndex/24);screen='roster'},'#8ad5ff',20);
    button(39,273,197,66,'РАНГИ',()=>{screen='ranks'},'#d4baff',20);
    button(39,356,197,66,'ПРО-ДРАФТ',()=>beginDraft(true),'#a7efc1',18);
    rr(38,447,199,128,14,'#15295b','#67a4f1',2);
@@ -81,4 +81,27 @@
    text('3×3  ·  СЛУЧАЙНАЯ КАРТА  ·  БОТЫ',151,676,16,'#cdeaff','left',850);
    button(843,606,413,103,'ИГРАТЬ',()=>beginDraft(false),'#ffca31',35,rankIdx()>=3?'БАНЫ И ВЫБОР БОЙЦОВ':'ВЫБОР БОЙЦОВ');
  };
+ window.rosterDraw=function(){
+  backdrop();
+  text('ВЫБОР БОЙЦА',640,41,37,'#ffe28a','center',1000,true);
+  text('Всего бойцов: '+heroes.length+'  ·  Нажми на карточку, чтобы играть за персонажа',640,82,18,'#cdeaff','center',800);
+  const pageSize=24,pages=Math.ceil(heroes.length/pageSize);
+  rosterPage=Math.max(0,Math.min(rosterPage,pages-1));
+  for(let j=0;j<pageSize;j++){
+   const id=rosterPage*pageSize+j;if(id>=heroes.length)break;
+   const h=heroes[id],col=j%6,row=Math.floor(j/6),x=36+col*203,y=112+row*132,w=193,hh=123;
+   const chosen=id===heroIndex;
+   rr(x,y,w,hh,12,chosen?'#314f83':'#21325b',chosen?'#ffe27b':'#6688bb',chosen?4:2);
+   iconFighter(x+49,y+54,33,id,0);
+   text(h.name,x+111,y+31,h.name.length>11?12:15,'#fff','center',1000,true);
+   text(h.cls,x+110,y+59,12,classColors[h.cls],'center',900);
+   text(chosen?'ВЫБРАН':'СИЛА 11',x+110,y+96,13,chosen?'#ffe17b':'#b8d8f8','center',900);
+   buttonRects.push({x,y,w,h:hh,action:()=>{heroIndex=id;screen='menu'}});
+  }
+  button(402,658,125,49,'◀',()=>{rosterPage=(rosterPage+pages-1)%pages},'#acd4ff',22);
+  text('СТРАНИЦА '+(rosterPage+1)+' / '+pages,637,683,18,'#fff','center',900);
+  button(743,658,125,49,'▶',()=>{rosterPage=(rosterPage+1)%pages},'#f8dca2',22);
+  button(1017,657,220,50,'НАЗАД',()=>{screen='menu'},'#ffc949',22);
+ };
+
 })();
