@@ -182,7 +182,7 @@ function rankDivision(points=rankPoints){
 function progress(){const r=rankIdx();return r===7?1:(rankPoints-rankThresholds[r])/(rankThresholds[r+1]-rankThresholds[r])}
 function passLevel(){return Math.floor(proPassXP/200)+1}
 
-function resize(){const dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(innerWidth*dpr);cv.height=Math.round(innerHeight*dpr);scaleX=cv.width/W;scaleY=cv.height/H}window.addEventListener('resize',resize);resize();loadRank();
+function resize(){const dpr=Math.min(1.5,window.devicePixelRatio||1);cv.width=Math.round(innerWidth*dpr);cv.height=Math.round(innerHeight*dpr);scaleX=cv.width/W;scaleY=cv.height/H}window.addEventListener('resize',resize);resize();loadRank();
 function rr(x,y,w,h,r,fill,stroke,lw=2){c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill()}if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke()}}
 function text(t,x,y,size=22,color='#fff',align='left',weight=800,shadow=false){c.save();c.textAlign=align;c.textBaseline='middle';c.font=`${weight} ${size}px system-ui,-apple-system,sans-serif`;c.fillStyle=color;if(shadow){c.shadowColor='#06061a';c.shadowBlur=5;c.shadowOffsetY=3}c.fillText(t,x,y);c.restore()}
 function gradient(x,y,w,h,cs){let g=c.createLinearGradient(x,y+w*.15,x+w,y+h);g.addColorStop(0,cs[0]);g.addColorStop(1,cs[1]);return g}
@@ -622,7 +622,7 @@ function updateBattle(dt){
     let mx=controls.move.x,my=controls.move.y;
     if(keys.has('w')||keys.has('arrowup'))my-=1;if(keys.has('s')||keys.has('arrowdown'))my+=1;
     if(keys.has('a')||keys.has('arrowleft'))mx-=1;if(keys.has('d')||keys.has('arrowright'))mx+=1;
-    const len=Math.hypot(mx,my);if(len>.07&&a.root<=0)moveA(a,mx/Math.max(1,len),my/Math.max(1,len),dt);
+    const len=Math.hypot(mx,my);if(a.root<=0)moveA(a,mx/Math.max(1,len),my/Math.max(1,len),dt);
     if(controls.superId!==null)a.aim=controls.superAim;else if(controls.fireId!==null||controls.mouseAimId!==null)a.aim=controls.fire;
   }
   else {
@@ -832,7 +832,7 @@ function resultDraw(){
 }
 
 function drawCombat(){backdrop();const m=match;
- const playerCamera=m.actors[0],targetCamera=cap(playerCamera.y-380,0,FIELD.bottom-480);cameraY+=(targetCamera-cameraY)*Math.min(1,renderDt*10);
+ const playerCamera=m.actors[0],targetCamera=cap(playerCamera.y-380,0,FIELD.bottom-480);cameraY+=(targetCamera-cameraY)*(1-Math.exp(-5.5*Math.min(renderDt,.05)));
  c.save();c.beginPath();c.rect(275,132,730,492);c.clip();c.translate(0,132-cameraY);
  arena();drawObjectives(m);
  for(let hz of m.hazards){c.save();c.globalAlpha=.16+.18*Math.sin(tick*6)**2;c.beginPath();c.arc(hz.x,hz.y,hz.r,0,TAU);c.fillStyle=hz.kind==='thorns'?'#74df4c':hz.kind==='sandstorm'?'#e9cf9a':hz.kind==='honey'?'#f4c956':'#ffa44c';c.fill();c.strokeStyle=hz.kind==='thorns'?'#b5ff83':hz.kind==='sandstorm'?'#ffee9d':'#ffcc89';c.lineWidth=3;c.stroke();c.restore()}
@@ -1054,6 +1054,6 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();resetPointers()});
-let renderDt=.016;function frame(t){let dt=last?Math.min(.042,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let renderDt=.016;function frame(t){let dt=last?Math.min(.033,(t-last)/1000):.016;renderDt=dt;last=t;c.setTransform(scaleX,0,0,scaleY,0,0);c.clearRect(0,0,W,H);buttonRects=[];advance(dt);if(screen==='menu')menuDraw();else if(screen==='draft')draftDraw();else if(screen==='pass')passDraw();else if(screen==='battle')drawCombat();else if(screen==='result')resultDraw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./service-worker.js').catch(()=>{})}
-</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=1"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=1"></script></body></html>
+</script><script src="gadgets.js?v=2"></script><script src="ranked-ui.js?v=1"></script><script src="lobby-ui.js?v=1"></script><script src="visual-25d.js?v=1"></script><script src="smooth-motion.js?v=1"></script></body></html>
