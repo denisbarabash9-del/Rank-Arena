@@ -81,7 +81,7 @@ function draftAvailable(){return heroes.map((_,i)=>i).filter(i=>!draft.picks.inc
 function beginDraft(practice=false){
  modeIndex=pickFromBag('retro25_modes',MODE_DATA.length);mapIndex=pickFromBag('retro25_maps',MAPS.length);modifierIndex=0;
  applyMap(mapIndex);match=null;
- const tier=practice?7:rankIdx(),bans=tier>=3,turns=tier>=4;
+ const tier=practice?7:rankIdx(),bans=tier>=3,turns=true;
  draft={picks:[-1,-1,-1,-1,-1,-1],bans:[],banStep:0,phase:bans?'ban':'pick',step:turns?0:5,
   elapsed:0,selected:-1,mode:modeIndex,map:mapIndex,modifier:0,
   tier,bestOf:tier>=4?3:1,turns,practice,page:rosterPage};
