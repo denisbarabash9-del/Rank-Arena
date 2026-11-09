@@ -36,10 +36,17 @@
   for(let i=0;i<3;i++)drawSlot(i,5,101+i*91,0);
   text('VS',226,383,43,'#ffffff','center',1000,true);
   for(let i=3;i<6;i++)drawSlot(i,5,399+(i-3)*91,1);
-  // Grid: 24 fighters, all visible at once. 6 columns × 4 rows.
+  // Page controls: 24 cards at once; all fighters available.
+  const pageSize=24,pages=Math.ceil(heroes.length/pageSize);
+  draft.page=Math.max(0,Math.min(pages-1,draft.page||0));
+  button(866,49,66,35,'◀',()=>{draft.page=(draft.page+pages-1)%pages},'#b1ceff',20);
+  text((draft.page+1)+' / '+pages,975,67,18,'#fff','center',1000,true);
+  button(1023,49,66,35,'▶',()=>{draft.page=(draft.page+1)%pages},'#ffe09d',20);
   const gx=474,gy=104,cw=126,ch=119,space=4;
-  for(let i=0;i<heroes.length;i++){
-   const h=heroes[i],col=i%6,row=(i/6)|0;
+  for(let j=0;j<pageSize;j++){
+   const i=draft.page*pageSize+j;
+   if(i>=heroes.length)break;
+   const h=heroes[i],col=j%6,row=(j/6)|0;
    const x=gx+col*(cw+space),y=gy+row*(ch+space);
    const blocked=draft.bans.includes(i)||draft.picks.includes(i),selected=myTurn&&draft.selected===i;
    rr(x+2,y+5,cw,ch,3,'#0008');
@@ -62,7 +69,7 @@
   text(ban?'BAN A BRAWLER':'PICK A BRAWLER',490,626,22,'#ffde68','left',1000,true);
   const bannedNames=draft.bans.map(i=>heroes[i].name).join(', ')||'НЕТ';
   text('БАНЫ: '+bannedNames,490,654,13,'#ffd3dc','left',800);
-  text('РАНГ: '+(draft.practice?'ТРЕНИРОВКА':rankDivision()),490,682,14,'#bcd9ff','left',850);
+  text('РАНГ: '+(draft.practice?'ТРЕНИРОВКА':rankDivision())+'  ·  БОЙЦОВ: '+heroes.length,490,682,14,'#bcd9ff','left',850);
   if(myTurn&&draft.selected>=0&&available.includes(draft.selected)){
    button(924,626,317,64,ban?'ЗАПРЕТИТЬ':'ВЫБРАТЬ '+heroes[draft.selected].name,confirmDraft,'#ffce3c',21);
   }else{
