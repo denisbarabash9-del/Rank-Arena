@@ -88,7 +88,7 @@ function matchupDamage(attackerType,defenderType){
  const advantage=matchupEdge(attackerType,defenderType);
  return advantage>0?1.30:advantage<0?.70:1;
 }
-function scoreCounter(heroId,foes){return foes.reduce((score,foe)=>score+matchupEdge(heroId,foe)*4,0)}
+function scoreCounter(heroId,foes){return foes.reduce((score,foe)=>score+(foe>=0&&foe<heroes.length?matchupEdge(heroId,foe)*4:0),0)}
 
 function draftAvailable(){return heroes.map((_,i)=>i).filter(i=>!draft.picks.includes(i)&&!draft.bans.includes(i))}
 function beginDraft(practice=false){
@@ -106,14 +106,14 @@ function tacticScore(heroId,foes,mates){
  const hero=heroes[heroId],cl=hero.cls,map=MAPS[mapIndex],fav=MODE_DATA[modeIndex].fav;
  let score=scoreCounter(heroId,foes)*3;
  score+=fav.includes(cl)?3:0;
- const matchClasses=mates.map(i=>heroes[i].cls),dups=matchClasses.filter(x=>x===cl).length;
+ const matchClasses=mates.filter(i=>Number.isInteger(i)&&i>=0&&i<heroes.length).map(i=>heroes[i].cls),dups=matchClasses.filter(x=>x===cl).length;
  score-=dups*2.9;
  if(cl==='ПОДДЕРЖКА'&&matchClasses.includes('ТАНК'))score+=3.5;
  if(cl==='ТАНК'&&matchClasses.includes('ПОДДЕРЖКА'))score+=3;
  if(cl==='МЕТАТЕЛЬ'&&map.walls.length>=8)score+=2.2;
  if(cl==='УБИЙЦА'&&map.bushes.length>=6)score+=2;
  if(cl==='СТРЕЛОК'&&map.walls.length<=8)score+=1.5;
- if(foes.some(n=>heroes[n].cls==='ТАНК')&&['МЕТАТЕЛЬ','УРОН'].includes(cl))score+=1.2;
+ if(foes.some(n=>n>=0&&n<heroes.length&&heroes[n].cls==='ТАНК')&&['МЕТАТЕЛЬ','УРОН'].includes(cl))score+=1.2;
  if(matchClasses.length===1&&!matchClasses.includes('ТАНК')&&cl==='ТАНК')score+=1.2;
  return score;
 }
